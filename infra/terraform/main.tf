@@ -1,0 +1,74 @@
+##############################################
+# VPC Module
+# WHY: Provides networking foundation (subnets, NAT, routing).
+# HOW: Outputs subnet IDs used by EKS and node groups.
+##############################################
+module "vpc" {
+  source  = "./modules/vpc"
+  region  = var.region
+  project = var.project
+  owner   = var.owner
+}
+
+##############################################
+# IAM Module
+# WHY: Central place to define IAM roles (Operator, Node, IRSA, CI/CD).
+# HOW: Outputs ARNs consumed by EKS and node groups.
+##############################################
+module "iam" {
+  source       = "./modules/iam"
+  project      = var.project
+  owner        = var.owner
+  cluster_name = var.cluster_name
+
+  # WHY: Needed for trust policies and OIDC wiring.
+  account_id               = var.account_id
+  github_org               = var.github_org
+  github_repo              = var.github_repo
+  github_oidc_provider_arn = var.github_oidc_provider_arn   # HOW: For CI/CD role trust
+  eks_oidc_provider_arn    = var.eks_oidc_provider_arn      # HOW: For IRSA trust
+  eks_oidc_provider_sub    = var.eks_oidc_provider_sub      # HOW: For IRSA subject matching
+}
+
+##############################################
+# EKS Cluster Module
+# WHY: Creates the control plane (API server, etcd).
+# HOW: Needs VPC subnets + cluster IAM role.
+##############################################
+module "eks" {
+  source             = "./modules/eks"
+  project            = var.project
+  owner              = var.owner
+  region             = var.region
+  cluster_name       = var.cluster_name
+
+  private_subnet_ids = module.vpc.private_subnet_ids   # HOW: Cluster control plane runs in private subnets
+  cluster_role_arn   = module.iam.cluster_role_arn     # HOW: IAM role for EKS control plane
+}
+
+##############################################
+# GPU Node Group Module
+# WHY: Provides GPU worker nodes (ON_DEMAND + SPOT).
+# HOW: Needs node IAM role + subnets.
+##############################################
+module "gpu_node_group" {
+  source           = "./modules/gpu_node_group"
+  cluster_name     = module.eks.cluster_name
+  node_role_arn    = module.iam.eks_node_role_arn      # HOW: IAM role for EC2 nodes
+  public_subnet_ids = module.vpc.public_subnet_ids     # HOW: Nodes in public subnets for GPU workloads
+  project          = var.project
+  owner            = var.owner
+}
+
+##############################################
+# NVIDIA Plugin Module
+# WHY: Installs device plugin so Kubernetes can schedule GPU workloads.
+# HOW: Uses Helm provider to deploy DaemonSet.
+##############################################
+module "nvidia_plugin" {
+  source = "./modules/nvidia_plugin"
+  providers = {
+    helm = helm
+  }
+}
+

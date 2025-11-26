@@ -1,0 +1,46 @@
+autoscaling set to zero for night shut down otherwise kubernetes will schedule pods/nodes
+aws autoscaling update-auto-scaling-group \
+  --auto-scaling-group-name eks-gpu-e2e-cluster-gpu-on-demand-28cd5e84-2e03-7518-7c2f-af05374b5eec \
+  --desired-capacity 0
+
+This cleanly drains all GPU nodes.
+
+Tomorrow, scale back up (desired-capacity 1) → new nodes come online, plugin redeploys, Triton reschedules.
+
+Persistent model repo must be PVC/S3, otherwise models are lost.
+==============
+
+You need to update the ASG min size first, then scale down:
+
+bash
+aws autoscaling update-auto-scaling-group \
+  --auto-scaling-group-name eks-gpu-e2e-cluster-gpu-on-demand-28cd5e84-2e03-7518-7c2f-af05374b5eec \
+  --min-size 0 \
+  --desired-capacity 0
+==================
+
+
+aws autoscaling update-auto-scaling-group \
+  --auto-scaling-group-name eks-gpu-e2e-cluster-gpu-on-demand-28cd5e84-2e03-7518-7c2f-af05374b5eec \
+  --min-size 0 \
+  --max-size 0 \
+  --desired-capacity 0
+
+Tommorow Plan : 
+aws autoscaling update-auto-scaling-group \
+  --auto-scaling-group-name eks-gpu-e2e-cluster-gpu-on-demand-28cd5e84-2e03-7518-7c2f-af05374b5eec \
+  --min-size 1 \
+  --desired-capacity 1
+
+
+
+
+
+
+
+
+
+
+
+
+

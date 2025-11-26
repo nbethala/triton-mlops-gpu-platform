@@ -1,0 +1,223 @@
+Name:                 aws-node-7ggwm
+Namespace:            kube-system
+Priority:             2000001000
+Priority Class Name:  system-node-critical
+Service Account:      aws-node
+Node:                 ip-10-0-1-76.ec2.internal/10.0.1.76
+Start Time:           Tue, 25 Nov 2025 18:25:24 +0000
+Labels:               app.kubernetes.io/instance=aws-vpc-cni
+                      app.kubernetes.io/name=aws-node
+                      controller-revision-hash=76b7854f6d
+                      k8s-app=aws-node
+                      pod-template-generation=1
+Annotations:          <none>
+Status:               Running
+IP:                   10.0.1.76
+IPs:
+  IP:           10.0.1.76
+Controlled By:  DaemonSet/aws-node
+Init Containers:
+  aws-vpc-cni-init:
+    Container ID:   containerd://f88d7951c8df8d2ed67ddd3e85e8a926c272a723838f811a8af09c1e65740446
+    Image:          602401143452.dkr.ecr.us-east-1.amazonaws.com/amazon-k8s-cni-init:v1.20.4-eksbuild.2
+    Image ID:       602401143452.dkr.ecr.us-east-1.amazonaws.com/amazon-k8s-cni-init@sha256:4cc269e566688eeabf7f59533ffcc8ddb629d4956e1963b704052bfec70a9b46
+    Port:           <none>
+    Host Port:      <none>
+    State:          Terminated
+      Reason:       Completed
+      Exit Code:    0
+      Started:      Tue, 25 Nov 2025 18:25:27 +0000
+      Finished:     Tue, 25 Nov 2025 18:25:28 +0000
+    Ready:          True
+    Restart Count:  0
+    Requests:
+      cpu:  25m
+    Environment:
+      DISABLE_TCP_EARLY_DEMUX:  false
+      ENABLE_IPv6:              false
+    Mounts:
+      /host/opt/cni/bin from cni-bin-dir (rw)
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-clw64 (ro)
+Containers:
+  aws-node:
+    Container ID:   containerd://ed83722437de54d9e9003919e24efc33483042358e59e5f9c4f56510f9f4e9f0
+    Image:          602401143452.dkr.ecr.us-east-1.amazonaws.com/amazon-k8s-cni:v1.20.4-eksbuild.2
+    Image ID:       602401143452.dkr.ecr.us-east-1.amazonaws.com/amazon-k8s-cni@sha256:23f64d454047173490658c5866bca1a68d1b3c11df4248b2c837253d933fd150
+    Port:           61678/TCP (metrics)
+    Host Port:      61678/TCP (metrics)
+    State:          Waiting
+      Reason:       CrashLoopBackOff
+    Last State:     Terminated
+      Reason:       Error
+      Exit Code:    2
+      Started:      Tue, 25 Nov 2025 19:19:40 +0000
+      Finished:     Tue, 25 Nov 2025 19:21:10 +0000
+    Ready:          False
+    Restart Count:  17
+    Requests:
+      cpu:      25m
+    Liveness:   exec [/app/grpc-health-probe -addr=:50051 -connect-timeout=5s -rpc-timeout=5s] delay=60s timeout=10s period=10s #success=1 #failure=3
+    Readiness:  exec [/app/grpc-health-probe -addr=:50051 -connect-timeout=5s -rpc-timeout=5s] delay=1s timeout=10s period=10s #success=1 #failure=3
+    Environment:
+      ADDITIONAL_ENI_TAGS:                    {}
+      ANNOTATE_POD_IP:                        false
+      AWS_VPC_CNI_NODE_PORT_SUPPORT:          true
+      AWS_VPC_ENI_MTU:                        9001
+      AWS_VPC_K8S_CNI_CUSTOM_NETWORK_CFG:     false
+      AWS_VPC_K8S_CNI_EXTERNALSNAT:           false
+      AWS_VPC_K8S_CNI_LOGLEVEL:               DEBUG
+      AWS_VPC_K8S_CNI_LOG_FILE:               /host/var/log/aws-routed-eni/ipamd.log
+      AWS_VPC_K8S_CNI_RANDOMIZESNAT:          prng
+      AWS_VPC_K8S_CNI_VETHPREFIX:             eni
+      AWS_VPC_K8S_PLUGIN_LOG_FILE:            /var/log/aws-routed-eni/plugin.log
+      AWS_VPC_K8S_PLUGIN_LOG_LEVEL:           DEBUG
+      CLUSTER_NAME:                           gpu-e2e-cluster
+      DISABLE_INTROSPECTION:                  false
+      DISABLE_METRICS:                        false
+      DISABLE_NETWORK_RESOURCE_PROVISIONING:  false
+      ENABLE_IMDS_ONLY_MODE:                  false
+      ENABLE_IPv4:                            true
+      ENABLE_IPv6:                            false
+      ENABLE_MULTI_NIC:                       false
+      ENABLE_POD_ENI:                         false
+      ENABLE_PREFIX_DELEGATION:               false
+      ENABLE_SUBNET_DISCOVERY:                true
+      NETWORK_POLICY_ENFORCING_MODE:          standard
+      VPC_CNI_VERSION:                        v1.20.4
+      VPC_ID:                                 vpc-0859595ac3d69546b
+      WARM_ENI_TARGET:                        1
+      WARM_PREFIX_TARGET:                     1
+      MY_NODE_NAME:                            (v1:spec.nodeName)
+      MY_POD_NAME:                            aws-node-7ggwm (v1:metadata.name)
+    Mounts:
+      /host/etc/cni/net.d from cni-net-dir (rw)
+      /host/opt/cni/bin from cni-bin-dir (rw)
+      /host/var/log/aws-routed-eni from log-dir (rw)
+      /run/xtables.lock from xtables-lock (rw)
+      /var/run/aws-node from run-dir (rw)
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-clw64 (ro)
+  aws-eks-nodeagent:
+    Container ID:  containerd://00fe573e0eb5d7eb05502c2d82ac7d9697bb0c12ade9afd45c5a0ff9e99cd0d2
+    Image:         602401143452.dkr.ecr.us-east-1.amazonaws.com/amazon/aws-network-policy-agent:v1.2.7-eksbuild.1
+    Image ID:      602401143452.dkr.ecr.us-east-1.amazonaws.com/amazon/aws-network-policy-agent@sha256:f99fb1fea5e16dc3a2429ddd0a2660d0f3b4ba40b467e81e1898b001ee54c240
+    Port:          8162/TCP (agentmetrics)
+    Host Port:     8162/TCP (agentmetrics)
+    Args:
+      --enable-ipv6=false
+      --enable-network-policy=false
+      --enable-cloudwatch-logs=false
+      --enable-policy-event-logs=false
+      --log-file=/var/log/aws-routed-eni/network-policy-agent.log
+      --metrics-bind-addr=:8162
+      --health-probe-bind-addr=:8163
+      --conntrack-cache-cleanup-period=300
+      --log-level=debug
+    State:          Running
+      Started:      Tue, 25 Nov 2025 18:25:41 +0000
+    Ready:          True
+    Restart Count:  0
+    Requests:
+      cpu:  25m
+    Environment:
+      MY_NODE_NAME:   (v1:spec.nodeName)
+    Mounts:
+      /host/opt/cni/bin from cni-bin-dir (rw)
+      /sys/fs/bpf from bpf-pin-path (rw)
+      /var/log/aws-routed-eni from log-dir (rw)
+      /var/run/aws-node from run-dir (rw)
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-clw64 (ro)
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True 
+  Initialized                 True 
+  Ready                       False 
+  ContainersReady             False 
+  PodScheduled                True 
+Volumes:
+  bpf-pin-path:
+    Type:          HostPath (bare host directory volume)
+    Path:          /sys/fs/bpf
+    HostPathType:  
+  cni-bin-dir:
+    Type:          HostPath (bare host directory volume)
+    Path:          /opt/cni/bin
+    HostPathType:  
+  cni-net-dir:
+    Type:          HostPath (bare host directory volume)
+    Path:          /etc/cni/net.d
+    HostPathType:  
+  log-dir:
+    Type:          HostPath (bare host directory volume)
+    Path:          /var/log/aws-routed-eni
+    HostPathType:  DirectoryOrCreate
+  run-dir:
+    Type:          HostPath (bare host directory volume)
+    Path:          /var/run/aws-node
+    HostPathType:  DirectoryOrCreate
+  xtables-lock:
+    Type:          HostPath (bare host directory volume)
+    Path:          /run/xtables.lock
+    HostPathType:  FileOrCreate
+  kube-api-access-clw64:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    Optional:                false
+    DownwardAPI:             true
+QoS Class:                   Burstable
+Node-Selectors:              <none>
+Tolerations:                 op=Exists
+                             node.kubernetes.io/disk-pressure:NoSchedule op=Exists
+                             node.kubernetes.io/memory-pressure:NoSchedule op=Exists
+                             node.kubernetes.io/network-unavailable:NoSchedule op=Exists
+                             node.kubernetes.io/not-ready:NoExecute op=Exists
+                             node.kubernetes.io/pid-pressure:NoSchedule op=Exists
+                             node.kubernetes.io/unreachable:NoExecute op=Exists
+                             node.kubernetes.io/unschedulable:NoSchedule op=Exists
+Events:
+  Type     Reason                 Age                    From               Message
+  ----     ------                 ----                   ----               -------
+  Warning  MissingIAMPermissions  35m (x2 over 35m)      aws-node           Unauthorized operation: failed to call ec2:DescribeNetworkInterfaces due to missing permissions. Please refer https://github.com/aws/amazon-vpc-cni-k8s/blob/master/docs/iam-policy.md to attach relevant policy to IAM role
+  Warning  MissingIAMPermissions  49m (x2 over 49m)      aws-node           Unauthorized operation: failed to call ec2:DescribeNetworkInterfaces due to missing permissions. Please refer https://github.com/aws/amazon-vpc-cni-k8s/blob/master/docs/iam-policy.md to attach relevant policy to IAM role
+  Warning  MissingIAMPermissions  53m (x2 over 53m)      aws-node           Unauthorized operation: failed to call ec2:DescribeNetworkInterfaces due to missing permissions. Please refer https://github.com/aws/amazon-vpc-cni-k8s/blob/master/docs/iam-policy.md to attach relevant policy to IAM role
+  Warning  MissingIAMPermissions  52m (x2 over 52m)      aws-node           Unauthorized operation: failed to call ec2:DescribeNetworkInterfaces due to missing permissions. Please refer https://github.com/aws/amazon-vpc-cni-k8s/blob/master/docs/iam-policy.md to attach relevant policy to IAM role
+  Warning  MissingIAMPermissions  50m (x2 over 50m)      aws-node           Unauthorized operation: failed to call ec2:DescribeNetworkInterfaces due to missing permissions. Please refer https://github.com/aws/amazon-vpc-cni-k8s/blob/master/docs/iam-policy.md to attach relevant policy to IAM role
+  Warning  MissingIAMPermissions  12m (x2 over 12m)      aws-node           Unauthorized operation: failed to call ec2:DescribeNetworkInterfaces due to missing permissions. Please refer https://github.com/aws/amazon-vpc-cni-k8s/blob/master/docs/iam-policy.md to attach relevant policy to IAM role
+  Warning  MissingIAMPermissions  47m (x2 over 47m)      aws-node           Unauthorized operation: failed to call ec2:DescribeNetworkInterfaces due to missing permissions. Please refer https://github.com/aws/amazon-vpc-cni-k8s/blob/master/docs/iam-policy.md to attach relevant policy to IAM role
+  Warning  MissingIAMPermissions  2m52s (x2 over 2m52s)  aws-node           Unauthorized operation: failed to call ec2:DescribeNetworkInterfaces due to missing permissions. Please refer https://github.com/aws/amazon-vpc-cni-k8s/blob/master/docs/iam-policy.md to attach relevant policy to IAM role
+  Warning  MissingIAMPermissions  4m23s (x2 over 4m23s)  aws-node           Unauthorized operation: failed to call ec2:DescribeNetworkInterfaces due to missing permissions. Please refer https://github.com/aws/amazon-vpc-cni-k8s/blob/master/docs/iam-policy.md to attach relevant policy to IAM role
+  Warning  MissingIAMPermissions  43m (x2 over 43m)      aws-node           Unauthorized operation: failed to call ec2:DescribeNetworkInterfaces due to missing permissions. Please refer https://github.com/aws/amazon-vpc-cni-k8s/blob/master/docs/iam-policy.md to attach relevant policy to IAM role
+  Warning  MissingIAMPermissions  56m (x2 over 56m)      aws-node           Unauthorized operation: failed to call ec2:DescribeNetworkInterfaces due to missing permissions. Please refer https://github.com/aws/amazon-vpc-cni-k8s/blob/master/docs/iam-policy.md to attach relevant policy to IAM role
+  Normal   Scheduled              57m                    default-scheduler  Successfully assigned kube-system/aws-node-7ggwm to ip-10-0-1-76.ec2.internal
+  Warning  MissingIAMPermissions  36m (x2 over 36m)      aws-node           Unauthorized operation: failed to call ec2:DescribeNetworkInterfaces due to missing permissions. Please refer https://github.com/aws/amazon-vpc-cni-k8s/blob/master/docs/iam-policy.md to attach relevant policy to IAM role
+  Warning  MissingIAMPermissions  11m (x2 over 11m)      aws-node           Unauthorized operation: failed to call ec2:DescribeNetworkInterfaces due to missing permissions. Please refer https://github.com/aws/amazon-vpc-cni-k8s/blob/master/docs/iam-policy.md to attach relevant policy to IAM role
+  Warning  MissingIAMPermissions  55m (x2 over 55m)      aws-node           Unauthorized operation: failed to call ec2:DescribeNetworkInterfaces due to missing permissions. Please refer https://github.com/aws/amazon-vpc-cni-k8s/blob/master/docs/iam-policy.md to attach relevant policy to IAM role
+  Warning  MissingIAMPermissions  20m (x2 over 20m)      aws-node           Unauthorized operation: failed to call ec2:DescribeNetworkInterfaces due to missing permissions. Please refer https://github.com/aws/amazon-vpc-cni-k8s/blob/master/docs/iam-policy.md to attach relevant policy to IAM role
+  Warning  MissingIAMPermissions  27m (x2 over 27m)      aws-node           Unauthorized operation: failed to call ec2:DescribeNetworkInterfaces due to missing permissions. Please refer https://github.com/aws/amazon-vpc-cni-k8s/blob/master/docs/iam-policy.md to attach relevant policy to IAM role
+  Warning  MissingIAMPermissions  28m (x2 over 28m)      aws-node           Unauthorized operation: failed to call ec2:DescribeNetworkInterfaces due to missing permissions. Please refer https://github.com/aws/amazon-vpc-cni-k8s/blob/master/docs/iam-policy.md to attach relevant policy to IAM role
+  Warning  MissingIAMPermissions  19m (x2 over 19m)      aws-node           Unauthorized operation: failed to call ec2:DescribeNetworkInterfaces due to missing permissions. Please refer https://github.com/aws/amazon-vpc-cni-k8s/blob/master/docs/iam-policy.md to attach relevant policy to IAM role
+  Normal   Pulling                57m                    kubelet            Pulling image "602401143452.dkr.ecr.us-east-1.amazonaws.com/amazon-k8s-cni-init:v1.20.4-eksbuild.2"
+  Normal   Started                57m                    kubelet            Started container aws-vpc-cni-init
+  Normal   Created                57m                    kubelet            Created container: aws-vpc-cni-init
+  Normal   Pulled                 57m                    kubelet            Successfully pulled image "602401143452.dkr.ecr.us-east-1.amazonaws.com/amazon-k8s-cni-init:v1.20.4-eksbuild.2" in 2.343s (2.343s including waiting). Image size: 70445438 bytes.
+  Normal   Pulling                56m                    kubelet            Pulling image "602401143452.dkr.ecr.us-east-1.amazonaws.com/amazon-k8s-cni:v1.20.4-eksbuild.2"
+  Normal   Pulling                56m                    kubelet            Pulling image "602401143452.dkr.ecr.us-east-1.amazonaws.com/amazon/aws-network-policy-agent:v1.2.7-eksbuild.1"
+  Normal   Pulled                 56m                    kubelet            Successfully pulled image "602401143452.dkr.ecr.us-east-1.amazonaws.com/amazon-k8s-cni:v1.20.4-eksbuild.2" in 2.099s (2.099s including waiting). Image size: 53394093 bytes.
+  Normal   Pulled                 56m                    kubelet            Successfully pulled image "602401143452.dkr.ecr.us-east-1.amazonaws.com/amazon/aws-network-policy-agent:v1.2.7-eksbuild.1" in 2.046s (2.046s including waiting). Image size: 35997169 bytes.
+  Normal   Created                56m                    kubelet            Created container: aws-eks-nodeagent
+  Normal   Started                56m                    kubelet            Started container aws-eks-nodeagent
+  Warning  Unhealthy              56m                    kubelet            Readiness probe failed: {"level":"info","ts":"2025-11-25T18:25:47.416Z","caller":"/usr/local/go/src/runtime/proc.go:283","msg":"timeout: failed to connect service \":50051\" within 5s"}
+  Warning  Unhealthy              56m                    kubelet            Readiness probe failed: {"level":"info","ts":"2025-11-25T18:25:52.483Z","caller":"/usr/local/go/src/runtime/proc.go:283","msg":"timeout: failed to connect service \":50051\" within 5s"}
+  Warning  Unhealthy              56m                    kubelet            Readiness probe failed: {"level":"info","ts":"2025-11-25T18:26:02.505Z","caller":"/usr/local/go/src/runtime/proc.go:283","msg":"timeout: failed to connect service \":50051\" within 5s"}
+  Warning  Unhealthy              56m                    kubelet            Readiness probe failed: {"level":"info","ts":"2025-11-25T18:26:12.492Z","caller":"/usr/local/go/src/runtime/proc.go:283","msg":"timeout: failed to connect service \":50051\" within 5s"}
+  Warning  Unhealthy              56m                    kubelet            Readiness probe failed: {"level":"info","ts":"2025-11-25T18:26:22.503Z","caller":"/usr/local/go/src/runtime/proc.go:283","msg":"timeout: failed to connect service \":50051\" within 5s"}
+  Warning  Unhealthy              56m                    kubelet            Readiness probe failed: {"level":"info","ts":"2025-11-25T18:26:32.493Z","caller":"/usr/local/go/src/runtime/proc.go:283","msg":"timeout: failed to connect service \":50051\" within 5s"}
+  Warning  Unhealthy              55m                    kubelet            Readiness probe failed: {"level":"info","ts":"2025-11-25T18:26:42.492Z","caller":"/usr/local/go/src/runtime/proc.go:283","msg":"timeout: failed to connect service \":50051\" within 5s"}
+  Warning  Unhealthy              55m                    kubelet            Liveness probe failed: {"level":"info","ts":"2025-11-25T18:26:50.293Z","caller":"/usr/local/go/src/runtime/proc.go:283","msg":"timeout: failed to connect service \":50051\" within 5s"}
+  Warning  Unhealthy              55m                    kubelet            Readiness probe failed: {"level":"info","ts":"2025-11-25T18:26:52.483Z","caller":"/usr/local/go/src/runtime/proc.go:283","msg":"timeout: failed to connect service \":50051\" within 5s"}
+  Normal   Started                52m (x4 over 56m)      kubelet            Started container aws-node
+  Normal   Created                52m (x4 over 56m)      kubelet            Created container: aws-node
+  Warning  BackOff                6m45s (x129 over 46m)  kubelet            Back-off restarting failed container aws-node in pod aws-node-7ggwm_kube-system(4c966ea4-b1c6-4095-bac9-32bb8bec2f86)
+  Normal   Pulled                 4m24s (x16 over 55m)   kubelet            Container image "602401143452.dkr.ecr.us-east-1.amazonaws.com/amazon-k8s-cni:v1.20.4-eksbuild.2" already present on machine
+  Warning  Unhealthy              103s (x234 over 55m)   kubelet            (combined from similar events): Liveness probe failed: {"level":"info","ts":"2025-11-25T19:20:50.295Z","caller":"/usr/local/go/src/runtime/proc.go:283","msg":"timeout: failed to connect service \":50051\" within 5s"}
+  Normal   Killing                83s (x18 over 55m)     kubelet            Container aws-node failed liveness probe, will be restarted

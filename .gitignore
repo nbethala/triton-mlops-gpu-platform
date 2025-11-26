@@ -1,0 +1,17 @@
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# Python
+__pycache__/
+*.pyc
+.env
+
+# Kubernetes
+*.yaml~ 
+*.secret.yaml
+
+# General
+.DS_Store
+*.pem

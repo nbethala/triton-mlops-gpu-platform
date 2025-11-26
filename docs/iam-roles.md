@@ -59,3 +59,13 @@
 |                     AWS Services                              |
 |   EKS | EC2 | ECR | S3 | ALB | CloudFormation | Logs | Route53 |
 +---------------------------------------------------------------+
+
+
+
+#### verify policies (CNI, ECR read, SSM): 
+```
+aws iam list-attached-role-policies --role-name EKSNodeRole --profile nancy-devops
+```
+AmazonEKS_CNI_Policy, AmazonEKSWorkerNodePolicy, AmazonEC2ContainerRegistryReadOnly, AmazonSSMManagedInstanceCore.
+
+

@@ -232,3 +232,36 @@ I1127 05:39:32.214706 1 http_server.cc:315] Started Metrics Service at 0.0.0.0:8
 00/v2/models/resnet50
 {"name":"resnet50","versions":["1"],"platform":"onnxruntime_onnx","inputs":[{"name":"data","datatype":"FP32","shape":[-1,3,224,224]}],"outputs":[{"name":"resnetv24_dense0_fwd","datatype":"FP32","shape":[-1,1000]}]}gpu-ec2-->
 
+
+
+####### Triton server info: 
+Triton is a big, complex system that includes:
+
+CUDA libraries
+
+TensorRT
+
+PyTorch runtime
+
+ONNX runtime
+
+Python backend
+
+C++ backend
+
+Built-in model management
+
+GPU optimization libraries
+
+Installing all of these manually on Ubuntu is nearly impossible and very error-prone.
+
+✅ Why Step 2: ./start-triton.sh ?
+Because the start-triton.sh script:
+
+✔ Runs the Triton server container you pulled
+✔ Mounts your models/ directory
+✔ Exposes ports (8000, 8001, 8002)
+✔ Enables GPU access (--gpus all)
+✔ Sets proper environment variables
+
+It basically launches the already downloaded Triton image in a clean, predictable environment.

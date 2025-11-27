@@ -1,0 +1,45 @@
+name: Build & Push Triton Image
+
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  triton-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::<ACCOUNT_ID>:role/github-oidc-ecr
+          aws-region: us-east-1
+
+      - name: Get AWS Account ID
+        id: acct
+        run: |
+          echo "ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)" >> $GITHUB_OUTPUT
+
+      - name: Login to ECR
+        run: |
+          aws ecr get-login-password --region us-east-1 | \
+          docker login --username AWS --password-stdin ${{ steps.acct.outputs.ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
+
+      - name: Build Docker Image
+        run: |
+          docker build -t triton-infer:latest ./services/triton
+
+      - name: Tag Image
+        run: |
+          docker tag triton-infer:latest ${{ steps.acct.outputs.ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/triton-infer:latest
+
+      - name: Push Image
+        run: |
+          docker push ${{ steps.acct.outputs.ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/triton-infer:latest

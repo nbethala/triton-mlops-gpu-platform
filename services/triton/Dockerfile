@@ -1,16 +1,18 @@
-# Base NVIDIA Triton image (GPU enabled)
-FROM nvcr.io/nvidia/tritonserver:24.01-py3-min
+# ✅ Start from the full Triton Inference Server image
+FROM nvcr.io/nvidia/tritonserver:24.01-py3
 
-# Where model repositories go inside container
-COPY models/ /models/
+# Set working directory inside container
+WORKDIR /opt/tritonserver
 
-# Expose Triton ports
+# Copy your model repository into the container
+# (adjust path if your models live elsewhere)
+COPY ./services/triton/models /models
+
+# Optional: copy custom configs, scripts, or entrypoints
+# COPY ./services/triton/configs /configs
+
+# Expose Triton’s default ports
 EXPOSE 8000 8001 8002
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s \
-  CMD curl -f http://localhost:8000/v2/health/ready || exit 1
-
-# Run Triton
-CMD ["tritonserver", "--model-repository=/models", "--strict-model-config=false"]
-
+# Default command: run Triton with your model repo
+CMD ["tritonserver", "--model-repository=/models"]

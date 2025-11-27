@@ -72,3 +72,15 @@ module "nvidia_plugin" {
   }
 }
 
+
+#=======================================================
+# Triton image ECR
+#======================================================
+module "ecr" {
+  source = "./modules/ecr"
+  project = var.project
+  owner  = var.owner
+}
+
+
+

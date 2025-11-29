@@ -14,4 +14,6 @@ github_oidc_provider_arn = "arn:aws:iam::123456789012:oidc-provider/token.action
 github_org              = "nbethala"
 
 # GitHub Repository Name
-github_repo             = "gpu-inference-platform"
+github_repo             = "nbethala/triton-mlops-gpu-platform"
+model_bucket_name = "triton-models"
+project           = "triton-mlops"

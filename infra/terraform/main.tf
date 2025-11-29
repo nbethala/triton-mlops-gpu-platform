@@ -76,8 +76,10 @@ module "nvidia_plugin" {
 # Github Actions 
 # use for CI
 #################################################
+data "aws_caller_identity" "current" {}
+
  module "github_actions_oidc" {
-  source = "./modules/iam"
+  source = "./modules/github_actions_oidc"
 
   project                = "triton-mlops"
   github_repo            = var.github_repo   #"nbethala/triton-mlops-gpu-platform"

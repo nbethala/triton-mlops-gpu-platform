@@ -52,3 +52,12 @@ variable "eks_oidc_provider_sub" {
    type = string 
 }
 
+variable "model_bucket_name" {
+  description = "Name of the S3 bucket for models"
+  type        = string
+}
+
+variable "eks_cluster_name" {
+  description = "Name of the EKS cluster"
+  type        = string
+}

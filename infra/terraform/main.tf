@@ -72,3 +72,33 @@ module "nvidia_plugin" {
   }
 }
 
+################################################
+# Github Actions 
+# use for CI
+#################################################
+ module "github_actions_oidc" {
+  source = "./modules/iam"
+
+  project                = "triton-mlops"
+  github_repo            = var.github_repo   #"nbethala/triton-mlops-gpu-platform"
+  github_branch          = "main"
+  oidc_provider_url      = "token.actions.githubusercontent.com"
+
+  ecr_repo_arns = [
+    "arn:aws:ecr:us-east-1:${data.aws_caller_identity.current.account_id}:repository/triton-infer"
+  ]
+
+  s3_model_bucket_arns = [
+    "arn:aws:s3:::${var.model_bucket_name}"
+  ]
+
+  eks_cluster_arns = [
+    "arn:aws:eks:${var.region}:${data.aws_caller_identity.current.account_id}:cluster/${var.eks_cluster_name}"
+  ]
+
+  node_role_arns = [] # list node role ARNs if you want iam:PassRole to be scoped
+  common_tags = {
+  project  = var.project
+  owner    = var.owner
+  }
+}

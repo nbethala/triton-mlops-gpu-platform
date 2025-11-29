@@ -11,8 +11,7 @@ eks_oidc_provider_sub   = "system:serviceaccount:default:triton-sa"
 github_oidc_provider_arn = "arn:aws:iam::123456789012:oidc-provider/token.actions.githubusercontent.com"
 
 # GitHub Organization or Username
-github_org              = "nancybethala"
+github_org              = "nbethala"
 
 # GitHub Repository Name
 github_repo             = "gpu-inference-platform"
-

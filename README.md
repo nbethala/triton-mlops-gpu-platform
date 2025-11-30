@@ -110,3 +110,8 @@ Always base64 encode values (echo -n "value" | base64)
 Use type: Opaque unless integrating with CSI or external secret stores
 
 Never commit secrets to Git — use .gitignore or external secret managers (e.g., AWS Secrets Manager via IRSA)
+
+
+
+### Project Status 
+[![Build & Push Triton Image](https://github.com/nbethala/triton-mlops-gpu-platform/actions/workflows/build-push-triton.yml/badge.svg)](https://github.com/nbethala/triton-mlops-gpu-platform/actions/workflows/build-push-triton.yml)

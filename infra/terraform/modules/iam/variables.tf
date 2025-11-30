@@ -40,7 +40,7 @@ variable "oidc_provider_url" {
   default     = "token.actions.githubusercontent.com"
 }
 
-variable "github_oidc_provider_arn" { 
+variable "oidc_provider_arn" { 
   description = "github_oidc tag for resources"  
   type = string 
 }

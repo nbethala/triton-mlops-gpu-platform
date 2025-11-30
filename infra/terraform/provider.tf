@@ -18,11 +18,14 @@ terraform {
 # Pull cluster details
 data "aws_eks_cluster" "cluster" {
   name = module.eks.cluster_name
+  depends_on = [module.eks]
 }
 
+# Fetch authentication token for the cluster
 data "aws_eks_cluster_auth" "cluster" {
   name = module.eks.cluster_name
 }
+
 
 # Kubernetes provider wired to EKS
 provider "kubernetes" {

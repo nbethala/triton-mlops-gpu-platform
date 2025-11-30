@@ -6,7 +6,7 @@ github_repo        = "nbethala/triton-mlops-gpu-platform"
 github_branch      = "main"
 oidc_provider_url  = "token.actions.githubusercontent.com"
 project            = "triton-mlops"
-github_oidc_provider_arn = "arn:aws:iam::<ACCOUNT_ID>:oidc-provider/token.actions.githubusercontent.com"
+oidc_provider_arn = "arn:aws:iam::478253497479:oidc-provider/token.actions.githubusercontent.com"
 
 
 # -------------------------

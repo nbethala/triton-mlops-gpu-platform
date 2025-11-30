@@ -42,9 +42,9 @@ variable "github_repo" {
    type = string
  }
 
-variable "github_oidc_provider_arn" { 
-  description = "github_oidc tag for resources"  
-  type = string 
+variable "oidc_provider_arn" {
+  description = "ARN of the GitHub OIDC provider for federation"
+  type        = string
 }
 
 variable "eks_oidc_provider_arn" {

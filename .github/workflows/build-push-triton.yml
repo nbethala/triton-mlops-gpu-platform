@@ -22,7 +22,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::<ACCOUNT_ID>:role/github-oidc-ecr
+          role-to-assume: arn:aws:iam::<ACCOUNT_ID>:role/CICD_EKS_GPU_Role
           aws-region: us-east-1
 
       - name: Get AWS Account ID

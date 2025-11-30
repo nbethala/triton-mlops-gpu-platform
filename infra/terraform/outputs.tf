@@ -17,3 +17,8 @@ output "eks_cluster_endpoint" {
 output "eks_cluster_role_arn" {
   value = module.iam.cluster_role_arn
 }
+
+output "github_actions_role_arn" {
+  description = "IAM role ARN for GitHub Actions OIDC"
+  value       = module.github_actions_oidc.github_actions_role_arn
+}

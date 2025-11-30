@@ -104,3 +104,45 @@ push to ECR
 update Helm values
 
 rollout Triton Deployment
+
+===================================
+Process steps : 
+====================================
+
+phase 1: setup GITHUB OIDC role
+phase 2: setup deployment for Triton 
+ - A minimal GitHub Actions workflow that:
+   ci/github-actions/deploy-triton.yml
+
+ - uses OIDC to assume the GitHub role,
+ - builds & tags the Triton image,
+ - pushes to ECR with sha and latest tags,
+ - updates kubeconfig,
+ - runs helm upgrade --install to deploy Triton.
+ - A full Helm chart skeleton for Triton (Chart.yaml, values.yaml, templates for Deployment, Service, ServiceAccount (IRSA), ConfigMap init sidecar, ServiceMonitor).
+- Prometheus + Grafana helm install snippets + recommended values (kube-prometheus-stack + dcgm-exporter + ServiceMonitor for Triton).
+- GPU monitoring dashboards: a small Grafana dashboard JSON (GPU utilization + GPU memory + Triton requests) and instructions to provision automatically.
+- Slack alerts: PrometheusRule + Alertmanager config secret example to send alerts to Slack (wired via secret webhook).
+- ECR image tagging & versioning: recommended tag scheme and example ECR lifecycle policy JSON to keep costs down.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

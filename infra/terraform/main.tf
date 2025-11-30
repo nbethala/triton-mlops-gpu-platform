@@ -104,3 +104,15 @@ data "aws_caller_identity" "current" {}
   owner    = var.owner
   }
 }
+
+#=======================================================
+# Triton image ECR
+#======================================================
+module "ecr" {
+  source = "./modules/ecr"
+  project = var.project
+  owner  = var.owner
+}
+
+
+

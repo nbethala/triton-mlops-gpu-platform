@@ -1,18 +1,44 @@
-# AWS Account ID
-account_id              = "478253497479"
+# -------------------------
+# GitHub Actions OIDC (CI/CD)
+# -------------------------
+github_org         = "my-org"
+github_repo        = "nbethala/triton-mlops-gpu-platform"
+github_branch      = "main"
+oidc_provider_url  = "token.actions.githubusercontent.com"
+project            = "triton-mlops"
+github_oidc_provider_arn = "arn:aws:iam::<ACCOUNT_ID>:oidc-provider/token.actions.githubusercontent.com"
 
-# EKS OIDC Provider ARN (for IAM roles tied to service accounts)
-eks_oidc_provider_arn   = "arn:aws:iam::123456789012:oidc-provider/oidc.eks.us-east-1.amazonaws.com/id/EXAMPLE"
 
-# EKS OIDC Provider Subject (service account identity)
-eks_oidc_provider_sub   = "system:serviceaccount:default:triton-sa"
+# -------------------------
+# EKS OIDC (IRSA for pods)
+# -------------------------
+eks_oidc_provider_arn = "arn:aws:iam::478253497479:oidc-provider/oidc.eks.us-east-1.amazonaws.com/id/EXAMPLE"
+eks_oidc_provider_sub = "system:serviceaccount:default:triton-sa"
 
-# GitHub OIDC Provider ARN (for GitHub Actions federation)
-github_oidc_provider_arn = "arn:aws:iam::123456789012:oidc-provider/token.actions.githubusercontent.com"
 
-# GitHub Organization or Username
-github_org              = "nancybethala"
+# -------------------------
+# AWS Account & Region
+# -------------------------
+account_id        = "478253497479"
+region            = "us-east-1"
 
-# GitHub Repository Name
-github_repo             = "gpu-inference-platform"
+# -------------------------
+# Resources
+# -------------------------
+model_bucket_name   = "triton-models"
+s3_model_bucket_arns = ["arn:aws:s3:::triton-models"]
 
+ecr_repo_arns       = ["arn:aws:ecr:us-east-1:478253497479:repository/triton-infer"]
+cluster_name         = "mlops-gpu-eks"
+eks_cluster_arns    = ["arn:aws:eks:us-east-1:478253497479:cluster/mlops-gpu-eks"]
+
+node_role_arns      = []
+
+# -------------------------
+# Tags
+# -------------------------
+common_tags = {
+  owner   = "nancy"
+  project = "triton-mlops"
+  env     = "dev"
+}

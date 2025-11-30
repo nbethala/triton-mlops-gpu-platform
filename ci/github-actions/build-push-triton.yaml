@@ -1,0 +1,87 @@
+### NOTE - after terraform apply - outoput the ARN and place it in github secrets.
+#
+name: Build/Push Triton & Deploy to EKS
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  build_push_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU (optional)
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Configure AWS creds via OIDC
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.GITHUB_ACTIONS_ROLE_ARN }}   # Terraform output stored as a GitHub secret
+          aws-region: ${{ env.AWS_REGION }}
+
+      # Dynamically fetch AWS account ID
+      - name: Get AWS account ID
+        id: aws_id
+        run: echo "ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)" >> $GITHUB_OUTPUT
+
+      - name: Login to ECR
+        run: |
+          aws ecr get-login-password --region ${{ env.AWS_REGION }} \
+            | docker login --username AWS --password-stdin ${{ steps.aws_id.outputs.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
+
+      - name: Build Docker image
+        id: build
+        run: |
+          IMAGE=${{ steps.aws_id.outputs.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/triton-infer
+          TAG_SHORT=${GITHUB_SHA::8}
+          TAG_SHA=${GITHUB_SHA}
+          docker build -t ${IMAGE}:${TAG_SHORT} -t ${IMAGE}:${TAG_SHA} services/triton
+          echo "IMAGE=${IMAGE}" >> $GITHUB_OUTPUT
+          echo "TAG_SHORT=${TAG_SHORT}" >> $GITHUB_OUTPUT
+          echo "TAG_SHA=${TAG_SHA}" >> $GITHUB_OUTPUT
+
+      - name: Push image (sha & short)
+        run: |
+          IMAGE=${{ steps.build.outputs.IMAGE }}
+          TAG_SHA=${{ steps.build.outputs.TAG_SHA }}
+          TAG_SHORT=${{ steps.build.outputs.TAG_SHORT }}
+          docker push ${IMAGE}:${TAG_SHA}
+          docker tag ${IMAGE}:${TAG_SHA} ${IMAGE}:latest
+          docker push ${IMAGE}:latest
+          docker push ${IMAGE}:${TAG_SHORT}
+          echo "IMAGE_URI=${IMAGE}:${TAG_SHA}" >> $GITHUB_OUTPUT
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME:-mlops-gpu-eks} --region ${{ env.AWS_REGION }}
+
+      - name: Deploy/upgrade Triton via Helm
+        env:
+          IMAGE_URI: ${{ steps.build.outputs.IMAGE }}:${{ steps.build.outputs.TAG_SHA }}
+        run: |
+          helm repo add nvidia https://nvidia.github.io/k8s-device-plugin || true
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts || true
+          helm repo update
+          helm upgrade --install triton services/triton/helm \
+            -n triton --create-namespace \
+            --set image.repository=${{ steps.build.outputs.IMAGE }} \
+            --set image.tag=${{ steps.build.outputs.TAG_SHA }}
+
+      - name: Wait for deployment rollout
+        run: |
+          kubectl -n triton rollout status deployment/triton --timeout=5m

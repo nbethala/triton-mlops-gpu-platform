@@ -50,45 +50,6 @@ resource "aws_iam_role_policy_attachment" "operator_attach" {
 }
 
 
-# =============
-
-# -----------------------------
-# CI Role (GitHub OIDC)
-# -----------------------------
-resource "aws_iam_role" "ci" {
-  name = "CICD_EKS_GPU_Role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Effect    = "Allow"
-      Principal = { Federated = var.github_oidc_provider_arn }
-      Action    = "sts:AssumeRoleWithWebIdentity"
-      Condition = {
-        StringEquals = {
-          "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com",
-          "token.actions.githubusercontent.com:sub" = "repo:${var.github_org}/${var.github_repo}:ref:refs/heads/main"
-        }
-      }
-    }]
-  })
-
-  tags = {
-    project = var.project
-    owner   = var.owner
-  }
-}
-
-resource "aws_iam_policy" "ci_policy" {
-  name   = "ProjectGPU-E2E-CI"
-  policy = file("${path.root}/policies/ci.json")
-}
-
-resource "aws_iam_role_policy_attachment" "ci_attach" {
-  role       = aws_iam_role.ci.name
-  policy_arn = aws_iam_policy.ci_policy.arn
-}
-
 # -----------------------------
 # ALB Controller Role (IRSA)
 # -----------------------------

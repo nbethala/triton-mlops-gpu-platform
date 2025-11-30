@@ -1,0 +1,8 @@
+# minimal production-minded chart (GPU scheduling + IRSA + model init sidecar).
+#
+apiVersion: v2
+name: triton
+description: Triton Inference Server Helm Chart (minimal)
+type: application
+version: 0.1.0
+appVersion: "2.42.0"

@@ -1,0 +1,48 @@
+replicaCount: 1
+
+image:
+  repository: "<ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/triton-infer"
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+serviceAccount:
+  create: true
+  name: triton-sa
+  annotations:
+    # IRSA annotation - filled by Helm upgrade via --set or edit manually
+    # eks.amazonaws.com/role-arn: arn:aws:iam::<ACCOUNT_ID>:role/triton-pod-role
+
+resources:
+  limits:
+    nvidia.com/gpu: 1
+  requests:
+    cpu: 1000m
+    memory: 2Gi
+
+nodeSelector:
+  accelerator: nvidia
+
+tolerations:
+  - key: "nvidia.com/gpu"
+    operator: "Exists"
+    effect: "NoSchedule"
+
+# model repo config (init-container will sync from S3)
+modelRepo:
+  s3:
+    bucket: "<YOUR_MODEL_BUCKET>"
+    prefix: "triton/models"
+    region: "us-east-1"
+
+ports:
+  http: 8000
+  grpc: 8001
+  metrics: 8002
+
+service:
+  type: ClusterIP
+  port: 8000
+
+metrics:
+  enabled: true
+  port: 8002

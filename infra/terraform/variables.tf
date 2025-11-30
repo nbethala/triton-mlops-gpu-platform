@@ -32,6 +32,11 @@ variable "github_org" {
   type = string 
 }
 
+variable "github_branch" {
+  type        = string
+  description = "GitHub branch used for CI/CD workflows"
+}
+
 variable "github_repo" {
    description = "github_repo tag for resources"  
    type = string
@@ -50,5 +55,46 @@ variable "eks_oidc_provider_arn" {
 variable "eks_oidc_provider_sub" {
    description = "eks_oidc_provider_sub tag for resources" 
    type = string 
+}
+
+variable "model_bucket_name" {
+  description = "Name of the S3 bucket for models"
+  type        = string
+}
+
+
+variable "ecr_repo_arns" {
+  type        = list(string)
+  description = "List of ECR repository ARNs used by GitHub Actions"
+}
+
+variable "oidc_provider_url" {
+  type        = string
+  description = "OIDC provider URL for GitHub Actions federation"
+}
+
+variable "node_role_arns" {
+  type        = list(string)
+  description = "List of IAM role ARNs for EKS worker nodes"
+}
+
+variable "s3_model_bucket_arns" {
+  type = list(string)
+  description = "List of S3 bucket ARNs for model storage"
+}
+
+variable "common_tags" {
+  type        = map(string)
+  description = "Common tags applied to all resources"
+  default = {
+    owner   = "nancy"
+    project = "triton-mlops"
+    env     = "dev"
+  }
+}
+
+variable "eks_cluster_arns" {
+  type        = list(string)
+  description = "List of EKS cluster ARNs"
 }
 

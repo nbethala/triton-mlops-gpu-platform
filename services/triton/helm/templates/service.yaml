@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: triton
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: triton
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.service.port }}
+      targetPort: http
+  selector:
+    app: triton

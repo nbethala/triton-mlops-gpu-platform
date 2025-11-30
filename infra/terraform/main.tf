@@ -95,7 +95,7 @@ data "aws_caller_identity" "current" {}
   ]
 
   eks_cluster_arns = [
-    "arn:aws:eks:${var.region}:${data.aws_caller_identity.current.account_id}:cluster/${var.eks_cluster_name}"
+    "arn:aws:eks:${var.region}:${data.aws_caller_identity.current.account_id}:cluster/${var.cluster_name}"
   ]
 
   node_role_arns = [] # list node role ARNs if you want iam:PassRole to be scoped

@@ -1,12 +1,10 @@
 terraform {
   required_providers {
     helm = {
-      source  = "hashicorp/helm"
-      version = "2.11.0"
+      source = "hashicorp/helm"
     }
     kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "2.22.0"
+      source = "hashicorp/kubernetes"
     }
   }
 }
@@ -19,7 +17,7 @@ locals {
 # -----------------------------------------------------
 # 1. Namespace: monitoring
 # -----------------------------------------------------
-resource "kubernetes_namespace" "monitoring" {
+resource "kubernetes_namespace" "monitoring_ns" {
   metadata {
     name = var.namespace
   }
@@ -30,7 +28,7 @@ resource "kubernetes_namespace" "monitoring" {
 # -----------------------------------------------------
 resource "helm_release" "prometheus" {
   name       = "kube-prometheus-stack"
-  namespace  = kubernetes_namespace.monitoring.metadata[0].name
+  namespace  = kubernetes_namespace.monitoring_ns.metadata[0].name
   repository = "https://prometheus-community.github.io/helm-charts"
   chart      = "kube-prometheus-stack"
   version    = "58.3.0"
@@ -39,7 +37,7 @@ resource "helm_release" "prometheus" {
     local.prometheus_values
   ]
 
-  depends_on = [kubernetes_namespace.monitoring]
+  depends_on = [kubernetes_namespace.monitoring_ns]
 }
 
 # -----------------------------------------------------
@@ -47,7 +45,7 @@ resource "helm_release" "prometheus" {
 # -----------------------------------------------------
 resource "helm_release" "grafana" {
   name       = "grafana"
-  namespace  = kubernetes_namespace.monitoring.metadata[0].name
+  namespace  = kubernetes_namespace.monitoring_ns.metadata[0].name
   repository = "https://grafana.github.io/helm-charts"
   chart      = "grafana"
   version    = "6.57.4"
@@ -65,7 +63,7 @@ resource "helm_release" "grafana" {
 resource "kubernetes_secret" "alertmanager" {
   metadata {
     name      = "alertmanager-slack"
-    namespace = kubernetes_namespace.monitoring.metadata[0].name
+    namespace = kubernetes_namespace.monitoring_ns.metadata[0].name
   }
 
   data = {
@@ -78,21 +76,21 @@ resource "kubernetes_secret" "alertmanager" {
 }
 
 # -----------------------------------------------------
-# 5. Load dashboards from ConfigMaps
+# 5. Load dashboards into Grafana via ConfigMaps
 # -----------------------------------------------------
 resource "kubernetes_config_map" "grafana_dashboards" {
-  for_each = fileset("${path.module}/configmaps", "*.yaml")
+  for_each = local.dashboard_paths
 
   metadata {
-    name      = trimsuffix(each.value, ".yaml")
-    namespace = kubernetes_namespace.monitoring.metadata[0].name
+    name      = trimsuffix(each.key, ".json")
+    namespace = kubernetes_namespace.monitoring_ns.metadata[0].name
     labels = {
       grafana_dashboard = "1"
     }
   }
 
   data = {
-    dashboard = file("${path.module}/configmaps/${each.value}")
+    dashboard = file(each.value)
   }
 
   depends_on = [helm_release.grafana]
@@ -116,15 +114,17 @@ resource "kubernetes_manifest" "prometheus_rules" {
 # -----------------------------------------------------
 resource "helm_release" "nvidia_dcgm" {
   name       = "dcgm-exporter"
-  namespace  = kubernetes_namespace.monitoring.metadata[0].name
+  namespace  = kubernetes_namespace.monitoring_ns.metadata[0].name
   repository = "https://nvidia.github.io/dcgm-exporter"
   chart      = "dcgm-exporter"
   version    = "3.1.8"
 
-  set {
-    name  = "serviceMonitor.enabled"
-    value = "true"
-  }
+  set = [
+    {
+      name  = "serviceMonitor.enabled"
+      value = "true"
+    }
+  ]
 
   depends_on = [
     helm_release.prometheus,

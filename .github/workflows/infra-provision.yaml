@@ -1,12 +1,11 @@
-#provision the EKS cluster AND the monitoring module 
-
-
+# provision the EKS cluster AND the monitoring module
+---
 name: Terraform Infra Provision
 
-on:
+"on":
   push:
-    branches: 
-       - main   # only create/update infra on main push
+    branches:
+      - main  # only create/update infra on main push
 
 permissions:
   id-token: write

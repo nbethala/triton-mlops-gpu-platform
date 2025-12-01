@@ -1,6 +1,7 @@
+---
 name: Helm Deploy Triton Platform + Monitoring
 
-on:
+"on":
   workflow_run:
     workflows: ["Terraform Infra Provision"]
     types:
@@ -52,7 +53,8 @@ jobs:
       # ------------------------------
       - name: Configure kubeconfig for EKS
         run: |
-          CLUSTER_NAME=$(terraform -chdir=infra/terraform output -raw eks_cluster_name)
+          CLUSTER_NAME=$(terraform -chdir=infra/terraform output \
+          -raw eks_cluster_name)
           aws eks update-kubeconfig \
             --region $AWS_REGION \
             --name $CLUSTER_NAME
@@ -83,16 +85,21 @@ jobs:
 
           EOF
 
-          kubectl -n $MONITORING_NAMESPACE delete secret alertmanager-main --ignore-not-found
-          kubectl -n $MONITORING_NAMESPACE create secret generic alertmanager-main \
-            --from-file=alertmanager.yaml
+          kubectl -n $MONITORING_NAMESPACE delete secret alertmanager-main \
+          --ignore-not-found
+
+          kubectl -n $MONITORING_NAMESPACE create secret generic \
+          alertmanager-main \
+          --from-file=alertmanager.yaml
 
       # ------------------------------
       # Wait for monitoring stack (terraform-managed prometheus stack)
       # ------------------------------
       - name: Wait for Prometheus Operator readiness
         run: |
-          kubectl -n $MONITORING_NAMESPACE rollout status deployment/kube-prometheus-stack-operator --timeout=5m
+          kubectl -n $MONITORING_NAMESPACE rollout status \
+          deployment/kube-prometheus-stack-operator \
+          --timeout=5m
 
       # ------------------------------
       # DEPLOY TRITON (Helm Chart Generated)
@@ -107,7 +114,9 @@ jobs:
 
       - name: Wait for Triton Deployment
         run: |
-          kubectl -n $TRITON_NAMESPACE rollout status deployment/triton --timeout=5m
+          kubectl -n $TRITON_NAMESPACE rollout status \
+          deployment/triton \
+          --timeout=5m
 
       # ------------------------------
       # NVIDIA DCGM Exporter (GPU Metrics)

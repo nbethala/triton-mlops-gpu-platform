@@ -1,40 +1,34 @@
+# -----------------------------------------------------
+# AWS provider config
+# -----------------------------------------------------
 provider "aws" {
   region = var.region
 }
 
-terraform {
-  required_providers {
-    helm = {
-      source  = "hashicorp/helm"
-      version = ">= 3.0.0"
-    }
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = ">= 2.0.0"
-    }
-  }
-}
-
-# Pull cluster details
+# -----------------------------------------------------
+# Data sources: pull cluster details
+# -----------------------------------------------------
 data "aws_eks_cluster" "cluster" {
-  name = module.eks.cluster_name
+  name       = module.eks.cluster_name
   depends_on = [module.eks]
 }
 
-# Fetch authentication token for the cluster
 data "aws_eks_cluster_auth" "cluster" {
   name = module.eks.cluster_name
 }
 
-
+# -----------------------------------------------------
 # Kubernetes provider wired to EKS
+# -----------------------------------------------------
 provider "kubernetes" {
   host                   = module.eks.cluster_endpoint
   cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
   token                  = data.aws_eks_cluster_auth.cluster.token
 }
 
-# Helm provider wired to same cluster (map syntax, not block)
+# -----------------------------------------------------
+# Helm provider wired to same cluster
+# -----------------------------------------------------
 provider "helm" {
   kubernetes = {
     host                   = module.eks.cluster_endpoint

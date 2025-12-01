@@ -5,7 +5,7 @@ output "grafana_release" {
 
 output "prometheus_release" {
   description = "Prometheus helm release name (kube-prometheus-stack)"
-  value       = helm_release.kube_prometheus.name
+  value       = helm_release.prometheus.name
 }
 
 output "monitoring_namespace" {

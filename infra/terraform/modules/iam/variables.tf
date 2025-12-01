@@ -9,24 +9,24 @@ variable "project" {
 }
 
 variable "account_id" {
-  description = "account ID tag for resources"   
-  type = string 
+  description = "account ID tag for resources"
+  type        = string
 }
 
 variable "cluster_name" {
-  description = "cluster name tag for resources"   
-  type = string 
+  description = "cluster name tag for resources"
+  type        = string
 }
 
-variable "github_org" { 
-  description = "github_org tag for resources"  
-  type = string 
+variable "github_org" {
+  description = "github_org tag for resources"
+  type        = string
 }
 
 variable "github_repo" {
-   description = "github_repo tag for resources"  
-   type = string
- }
+  description = "github_repo tag for resources"
+  type        = string
+}
 
 variable "github_branch" {
   type        = string
@@ -40,19 +40,19 @@ variable "oidc_provider_url" {
   default     = "token.actions.githubusercontent.com"
 }
 
-variable "oidc_provider_arn" { 
-  description = "github_oidc tag for resources"  
-  type = string 
+variable "oidc_provider_arn" {
+  description = "github_oidc tag for resources"
+  type        = string
 }
 
 variable "eks_oidc_provider_arn" {
-  description = "eks_oidc_provider_arn tag for resources" 
-  type = string 
+  description = "eks_oidc_provider_arn tag for resources"
+  type        = string
 }
 
 variable "eks_oidc_provider_sub" {
-   description = "eks_oidc_provider_sub tag for resources" 
-   type = string 
+  description = "eks_oidc_provider_sub tag for resources"
+  type        = string
 }
 
 variable "ecr_repo_arns" {

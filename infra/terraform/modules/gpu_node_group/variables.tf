@@ -1,18 +1,18 @@
 
 
 variable "project" {
-     type = string 
+  type = string
 }
 
-variable "owner" { 
-    type = string 
+variable "owner" {
+  type = string
 }
 
 
-variable "cluster_name" { 
+variable "cluster_name" {
   description = "EKS cluster name"
-  type = string 
- }
+  type        = string
+}
 
 #variable "private_subnet_ids" { 
 #   description = "List of private subnet IDs for EKS"
@@ -21,11 +21,11 @@ variable "cluster_name" {
 
 variable "public_subnet_ids" {
   description = "List of public subnet IDs for EKS"
-  type = list(string)
+  type        = list(string)
 }
 
 variable "node_role_arn" {
-    description = "Iam ARN rule for Node group"
-    type = string
+  description = "Iam ARN rule for Node group"
+  type        = string
 
 }

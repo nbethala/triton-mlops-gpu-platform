@@ -1,5 +1,5 @@
 locals {
-  repo_subject = "repo:${var.github_repo}:ref:refs/heads/${var.github_branch}"
+  repo_subject      = "repo:${var.github_repo}:ref:refs/heads/${var.github_branch}"
   oidc_provider_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${var.oidc_provider_url}"
 }
 
@@ -32,7 +32,7 @@ resource "aws_iam_policy" "ecr_policy" {
     Version = "2012-10-17",
     Statement = [
       {
-        Sid = "ECRPullPush"
+        Sid    = "ECRPullPush"
         Effect = "Allow"
         Action = [
           "ecr:GetAuthorizationToken",
@@ -49,7 +49,7 @@ resource "aws_iam_policy" "ecr_policy" {
         Resource = var.ecr_repo_arns == [] ? ["*"] : var.ecr_repo_arns
       },
       {
-        Sid = "ECRList"
+        Sid    = "ECRList"
         Effect = "Allow"
         Action = [
           "ecr:DescribeImages",
@@ -69,7 +69,7 @@ resource "aws_iam_policy" "s3_policy" {
     Version = "2012-10-17",
     Statement = [
       {
-        Sid = "S3ModelAccess"
+        Sid    = "S3ModelAccess"
         Effect = "Allow"
         Action = [
           "s3:GetObject",
@@ -96,7 +96,7 @@ resource "aws_iam_policy" "eks_terraform_policy" {
     Version = "2012-10-17",
     Statement = [
       {
-        Sid = "EksDescribe"
+        Sid    = "EksDescribe"
         Effect = "Allow"
         Action = [
           "eks:CreateCluster",
@@ -112,7 +112,7 @@ resource "aws_iam_policy" "eks_terraform_policy" {
         Resource = var.eks_cluster_arns == [] ? ["*"] : var.eks_cluster_arns
       },
       {
-        Sid = "EC2ForNodes"
+        Sid    = "EC2ForNodes"
         Effect = "Allow"
         Action = [
           "ec2:CreateLaunchTemplate",
@@ -129,7 +129,7 @@ resource "aws_iam_policy" "eks_terraform_policy" {
         Resource = "*"
       },
       {
-        Sid = "IAMForNodes"
+        Sid    = "IAMForNodes"
         Effect = "Allow"
         Action = [
           "iam:PassRole"
@@ -148,7 +148,7 @@ resource "aws_iam_policy" "misc_policy" {
     Version = "2012-10-17",
     Statement = [
       {
-        Sid = "CloudWatch"
+        Sid    = "CloudWatch"
         Effect = "Allow"
         Action = [
           "cloudwatch:PutMetricData",
@@ -161,7 +161,7 @@ resource "aws_iam_policy" "misc_policy" {
         Resource = "*"
       },
       {
-        Sid = "ELB"
+        Sid    = "ELB"
         Effect = "Allow"
         Action = [
           "elasticloadbalancing:CreateLoadBalancer",
@@ -201,5 +201,5 @@ resource "aws_iam_role_policy_attachment" "attach_misc" {
 #resource "aws_iam_role_policy_attachment" "attach_ecr_managed" {
 #  role       = aws_iam_role.github_actions_oidc.name
 #  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser"
-  # optional: comment out if using custom ecr_policy only
+# optional: comment out if using custom ecr_policy only
 #}

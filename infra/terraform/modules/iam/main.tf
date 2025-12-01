@@ -13,11 +13,11 @@ resource "aws_iam_role" "eks_operator" {
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Effect    = "Allow"
+      Effect = "Allow"
       Principal = {
         AWS = "arn:aws:iam::${var.account_id}:user/nancy-devops"
       }
-      Action    = "sts:AssumeRole"
+      Action = "sts:AssumeRole"
     }]
   })
 

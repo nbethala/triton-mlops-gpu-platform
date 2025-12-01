@@ -23,13 +23,13 @@ variable "cluster_name" {
 }
 
 variable "account_id" {
-  description = "account ID tag for resources"   
-  type = string 
+  description = "account ID tag for resources"
+  type        = string
 }
 
-variable "github_org" { 
-  description = "github_org tag for resources"  
-  type = string 
+variable "github_org" {
+  description = "github_org tag for resources"
+  type        = string
 }
 
 variable "github_branch" {
@@ -38,9 +38,9 @@ variable "github_branch" {
 }
 
 variable "github_repo" {
-   description = "github_repo tag for resources"  
-   type = string
- }
+  description = "github_repo tag for resources"
+  type        = string
+}
 
 variable "oidc_provider_arn" {
   description = "ARN of the GitHub OIDC provider for federation"
@@ -48,13 +48,13 @@ variable "oidc_provider_arn" {
 }
 
 variable "eks_oidc_provider_arn" {
-  description = "eks_oidc_provider_arn tag for resources" 
-  type = string 
+  description = "eks_oidc_provider_arn tag for resources"
+  type        = string
 }
 
 variable "eks_oidc_provider_sub" {
-   description = "eks_oidc_provider_sub tag for resources" 
-   type = string 
+  description = "eks_oidc_provider_sub tag for resources"
+  type        = string
 }
 
 variable "model_bucket_name" {
@@ -79,7 +79,7 @@ variable "node_role_arns" {
 }
 
 variable "s3_model_bucket_arns" {
-  type = list(string)
+  type        = list(string)
   description = "List of S3 bucket ARNs for model storage"
 }
 
@@ -96,5 +96,17 @@ variable "common_tags" {
 variable "eks_cluster_arns" {
   type        = list(string)
   description = "List of EKS cluster ARNs"
+}
+
+variable "prometheus_chart_version" {
+  description = "Version of the Prometheus Helm chart"
+  type        = string
+  default     = "58.3.0" # or whatever stable version you want
+}
+
+variable "grafana_chart_version" {
+  description = "Version of the Grafana Helm chart"
+  type        = string
+  default     = "7.3.0" # example stable version
 }
 

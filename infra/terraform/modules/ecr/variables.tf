@@ -1,7 +1,7 @@
 variable "project" {
-     type = string 
+  type = string
 }
 
-variable "owner" { 
-    type = string 
+variable "owner" {
+  type = string
 }

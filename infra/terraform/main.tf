@@ -22,12 +22,12 @@ module "iam" {
   cluster_name = var.cluster_name
 
   # WHY: Needed for trust policies and OIDC wiring.
-  account_id               = var.account_id
-  github_org               = var.github_org
-  github_repo              = var.github_repo
-  oidc_provider_arn        = var.oidc_provider_arn          # HOW: For CI/CD role trust
-  eks_oidc_provider_arn    = var.eks_oidc_provider_arn      # HOW: For IRSA trust
-  eks_oidc_provider_sub    = var.eks_oidc_provider_sub      # HOW: For IRSA subject matching
+  account_id            = var.account_id
+  github_org            = var.github_org
+  github_repo           = var.github_repo
+  oidc_provider_arn     = var.oidc_provider_arn     # HOW: For CI/CD role trust
+  eks_oidc_provider_arn = var.eks_oidc_provider_arn # HOW: For IRSA trust
+  eks_oidc_provider_sub = var.eks_oidc_provider_sub # HOW: For IRSA subject matching
 }
 
 ##############################################
@@ -36,14 +36,14 @@ module "iam" {
 # HOW: Needs VPC subnets + cluster IAM role.
 ##############################################
 module "eks" {
-  source             = "./modules/eks"
-  project            = var.project
-  owner              = var.owner
-  region             = var.region
-  cluster_name       = var.cluster_name
+  source       = "./modules/eks"
+  project      = var.project
+  owner        = var.owner
+  region       = var.region
+  cluster_name = var.cluster_name
 
-  private_subnet_ids = module.vpc.private_subnet_ids   # HOW: Cluster control plane runs in private subnets
-  cluster_role_arn   = module.iam.cluster_role_arn     # HOW: IAM role for EKS control plane
+  private_subnet_ids = module.vpc.private_subnet_ids # HOW: Cluster control plane runs in private subnets
+  cluster_role_arn   = module.iam.cluster_role_arn   # HOW: IAM role for EKS control plane
 }
 
 ##############################################
@@ -52,12 +52,12 @@ module "eks" {
 # HOW: Needs node IAM role + subnets.
 ##############################################
 module "gpu_node_group" {
-  source           = "./modules/gpu_node_group"
-  cluster_name     = module.eks.cluster_name
-  node_role_arn    = module.iam.eks_node_role_arn      # HOW: IAM role for EC2 nodes
-  public_subnet_ids = module.vpc.public_subnet_ids     # HOW: Nodes in public subnets for GPU workloads
-  project          = var.project
-  owner            = var.owner
+  source            = "./modules/gpu_node_group"
+  cluster_name      = module.eks.cluster_name
+  node_role_arn     = module.iam.eks_node_role_arn # HOW: IAM role for EC2 nodes
+  public_subnet_ids = module.vpc.public_subnet_ids # HOW: Nodes in public subnets for GPU workloads
+  project           = var.project
+  owner             = var.owner
 }
 
 ##############################################
@@ -78,13 +78,13 @@ module "nvidia_plugin" {
 #################################################
 data "aws_caller_identity" "current" {}
 
- module "github_actions_oidc" {
+module "github_actions_oidc" {
   source = "./modules/github_actions_oidc"
 
-  project                = "triton-mlops"
-  github_repo            = var.github_repo   #"nbethala/triton-mlops-gpu-platform"
-  github_branch          = "main"
-  oidc_provider_url      = "token.actions.githubusercontent.com"
+  project           = "triton-mlops"
+  github_repo       = var.github_repo #"nbethala/triton-mlops-gpu-platform"
+  github_branch     = "main"
+  oidc_provider_url = "token.actions.githubusercontent.com"
 
   ecr_repo_arns = [
     "arn:aws:ecr:us-east-1:${data.aws_caller_identity.current.account_id}:repository/triton-infer"
@@ -100,8 +100,8 @@ data "aws_caller_identity" "current" {}
 
   node_role_arns = [] # list node role ARNs if you want iam:PassRole to be scoped
   common_tags = {
-  project  = var.project
-  owner    = var.owner
+    project = var.project
+    owner   = var.owner
   }
 }
 
@@ -109,9 +109,9 @@ data "aws_caller_identity" "current" {}
 # Triton image ECR
 #======================================================
 module "ecr" {
-  source = "./modules/ecr"
+  source  = "./modules/ecr"
   project = var.project
-  owner  = var.owner
+  owner   = var.owner
 }
 
 #======================================================

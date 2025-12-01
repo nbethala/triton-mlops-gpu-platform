@@ -1,6 +1,7 @@
+---
 name: Terraform Destroy Infra
 
-on:
+"on":
   workflow_dispatch:     # manual trigger only
     inputs:
       confirm:
@@ -47,4 +48,3 @@ jobs:
 
       - name: Destroy Infrastructure
         run: terraform destroy -auto-approve
-

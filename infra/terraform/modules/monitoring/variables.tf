@@ -21,15 +21,18 @@ variable "grafana_chart_version" {
   default     = "9.5.1" # adjust to a compatible chart
 }
 
+# -----------------------------------------------------
+# Input: Dashboard filenames
+# -----------------------------------------------------
 variable "dashboards" {
-  description = "Map of dashboard name -> local path (relative to module) to load into grafana ConfigMap"
-  type        = map(string)
-  default     = {
-    "gpu-triton-dashboard.json" = "${path.module}/dashboards/gpu-triton-dashboard.json"
-    "triton-metrics.json"       = "${path.module}/dashboards/triton-metrics.json"
-    "latency-dashboard.json"    = "${path.module}/dashboards/latency-dashboard.json"
-    "gpu.json"                  = "${path.module}/dashboards/gpu.json"
-  }
+  description = "List of dashboard filenames to load into Grafana ConfigMap"
+  type        = list(string)
+  default = [
+    "gpu-triton-dashboard.json",
+    "triton-metrics.json",
+    "latency-dashboard.json",
+    "gpu.json",
+  ]
 }
 
 variable "slack_webhook_secret_name" {
@@ -38,7 +41,7 @@ variable "slack_webhook_secret_name" {
   default     = "alertmanager-slack"
 }
 
-variable "alertmanager_config_name" {
+variable "alertmanager_config" {
   description = "Name of the alertmanager secret to create"
   type        = string
   default     = "alertmanager-config"

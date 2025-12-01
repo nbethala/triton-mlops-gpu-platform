@@ -1,0 +1,15 @@
+# Minimal values overridden for kube-prometheus-stack
+prometheus:
+  prometheusSpec:
+    retention: "7d"
+    evaluationInterval: "30s"
+
+grafana:
+  enabled: false
+
+alertmanager:
+  enabled: true
+
+prometheusOperator:
+  tlsProxy:
+    enabled: false

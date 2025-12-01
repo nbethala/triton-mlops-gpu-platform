@@ -1,4 +1,4 @@
-#Requires Prometheus Operator / kube-prometheus-stack) 
+# This integrates Triton metrics with Prometheus.
 
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor

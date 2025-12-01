@@ -45,4 +45,30 @@ service:
 
 metrics:
   enabled: true
+  path: /metrics
   port: 8002
+
+livenessProbe:
+  enabled: true
+  path: /v2/health/ready
+  port: 8000
+  initialDelaySeconds: 10
+  timeoutSeconds: 5
+  periodSeconds: 10
+
+readinessProbe:
+  enabled: true
+  path: /v2/health/live
+  port: 8000
+  initialDelaySeconds: 5
+  timeoutSeconds: 5
+  periodSeconds: 10
+
+persistence:
+  enabled: false
+  # if you prefer EFS mount, configure here
+  path: /models
+
+extraEnv:
+  - name: AWS_REGION
+    value: "us-east-1"

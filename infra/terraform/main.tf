@@ -114,5 +114,15 @@ module "ecr" {
   owner  = var.owner
 }
 
-
+#======================================================
+# Prometheus + Grafana provisioning
+#====================================================
+module "monitoring" {
+  source       = "./modules/monitoring"
+  cluster_name = module.eks.cluster_name
+  namespace    = "monitoring"
+  # optionally override chart versions
+  prometheus_chart_version = "47.7.0"
+  grafana_chart_version    = "9.5.1"
+}
 

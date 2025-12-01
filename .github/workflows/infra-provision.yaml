@@ -1,0 +1,56 @@
+#provision the EKS cluster AND the monitoring module 
+
+
+name: Terraform Infra Provision
+
+on:
+  push:
+    branches: 
+       - main   # only create/update infra on main push
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  infra-provision:
+    runs-on: ubuntu-latest
+    environment: production   # 👈 environment gate
+
+  terraform:
+    name: Terraform Plan/Apply for EKS GPU Platform
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: infra/terraform
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Format
+        run: terraform fmt -check
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+        if: github.ref != 'refs/heads/main'
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+        if: github.ref == 'refs/heads/main'

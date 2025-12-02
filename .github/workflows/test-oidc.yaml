@@ -17,11 +17,19 @@ jobs:
 
       - name: Dump GitHub OIDC token
         run: |
-          TOKEN=$(curl -H "Authorization:
-          \ bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+          # Request the OIDC token from GitHub
+            TOKEN=$(curl -s \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
             "$ACTIONS_ID_TOKEN_REQUEST_URL")
-          echo "OIDC TOKEN PAYLOAD:"
-          echo $TOKEN | jq -r '.value' | cut -d "." -f2 | base64 -d | jq
+
+          # Extract the JWT value
+            JWT=$(echo "$TOKEN" | jq -r '.value')
+
+          # Decode the payload (middle part of JWT)
+            PAYLOAD=$(echo "$JWT" | cut -d "." -f2 | base64 --decode)
+
+            echo "OIDC TOKEN PAYLOAD:"
+            echo "$PAYLOAD" | jq .
 
       - name: Debug context
         run: |

@@ -47,7 +47,8 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          role-to-assume: >
+            arn:aws:iam::478253497479:role/triton-mlops-github-actions-oidc-role
           aws-region: us-east-1
           audience: sts.amazonaws.com
           output-env-credentials: true

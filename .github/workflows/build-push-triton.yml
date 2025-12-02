@@ -14,6 +14,8 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: production    # optional but recommended
+
     steps:
       - uses: actions/checkout@v4
 
@@ -26,12 +28,12 @@ jobs:
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build Image
+      - name: Build Triton Image
         run: |
           ECR="${{ secrets.AWS_ECR_URI }}"
           SHA=$(git rev-parse --short HEAD)
 
-          docker build -t triton:latest services/triton
+          docker build -t triton:latest ./services/triton
 
           docker tag triton:latest $ECR:latest
           docker tag triton:latest $ECR:$SHA
@@ -40,5 +42,6 @@ jobs:
         run: |
           ECR="${{ secrets.AWS_ECR_URI }}"
           SHA=$(git rev-parse --short HEAD)
+
           docker push $ECR:latest
           docker push $ECR:$SHA

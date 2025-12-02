@@ -46,18 +46,19 @@ jobs:
         uses: aws/setup-kubectl@v4
 
       - name: Install Helm
-        uses: azure/setup-helm@v4
+        uses: aws/setup-helm@v4
 
       # ------------------------------
       # Kubeconfig for EKS
       # ------------------------------
       - name: Configure kubeconfig for EKS
         run: |
-          CLUSTER_NAME=$(terraform -chdir=infra/terraform output \
-          -raw eks_cluster_name)
-          aws eks update-kubeconfig \
-            --region $AWS_REGION \
-            --name $CLUSTER_NAME
+          CLUSTER_NAME=$(
+            terraform -chdir=infra/terraform \
+               output -raw eks_cluster_name)
+               aws eks update-kubeconfig \
+               --region $AWS_REGION \
+                --name $CLUSTER_NAME
 
       - name: Verify K8s Connection
         run: kubectl get nodes

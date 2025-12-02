@@ -29,9 +29,9 @@ jobs:
         run: echo "Using AWS_OIDC_ROLE_ARN secret"
 
       - name: Debug GitHub context
-         run: |
-             echo "GITHUB_REPOSITORY=$GITHUB_REPOSITORY"
-             echo "GITHUB_REF=$GITHUB_REF"
+        run: |
+            echo "GITHUB_REPOSITORY=$GITHUB_REPOSITORY"
+            echo "GITHUB_REF=$GITHUB_REF"
 
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v2

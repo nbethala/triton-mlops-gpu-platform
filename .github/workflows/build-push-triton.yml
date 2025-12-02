@@ -19,12 +19,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
-          aws-region: us-east-1
-
       - name: Debug AWS role
         run: echo "Using AWS_OIDC_ROLE_ARN secret"
 
@@ -32,6 +26,12 @@ jobs:
         run: |
             echo "GITHUB_REPOSITORY=$GITHUB_REPOSITORY"
             echo "GITHUB_REF=$GITHUB_REF"
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
 
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v2

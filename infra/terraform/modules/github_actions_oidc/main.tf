@@ -1,5 +1,6 @@
 locals {
-  repo_subject      = "repo:${var.github_repo}:ref:refs/heads/${var.github_branch}"
+  #repo_subject      = "repo:${var.github_repo}:ref:refs/heads/${var.github_branch}"
+  repo_subject      = "repo:${var.github_repo}:*}"
   oidc_provider_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${var.oidc_provider_url}"
 }
 

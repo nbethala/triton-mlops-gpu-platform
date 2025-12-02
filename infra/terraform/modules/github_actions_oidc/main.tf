@@ -129,12 +129,14 @@ resource "aws_iam_policy" "eks_terraform_policy" {
         Resource = "*"
       },
       {
-        Sid    = "IAMForNodes"
+        Sid    = "IAMPermissions"
         Effect = "Allow"
         Action = [
-          "iam:PassRole"
+          "iam:PassRole",
+          "iam:GetRole",
+          "iam:CreateServiceLinkedRole"
         ]
-        Resource = var.node_role_arns == [] ? ["*"] : var.node_role_arns
+        Resource = "*"
       }
     ]
   })

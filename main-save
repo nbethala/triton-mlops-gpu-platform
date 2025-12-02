@@ -1,10 +1,10 @@
 terraform {
   required_providers {
     helm = {
-      source  = "hashicorp/helm"
+      source = "hashicorp/helm"
     }
     kubernetes = {
-      source  = "hashicorp/kubernetes"
+      source = "hashicorp/kubernetes"
     }
   }
 }
@@ -23,29 +23,65 @@ resource "kubernetes_namespace" "monitoring_ns" {
   }
 }
 
-# -----------------------------------------------------
-# 2. Install Prometheus via Helm (including CRDs)
-# -----------------------------------------------------
-resource "helm_release" "prometheus" {
-  depends_on = [kubernetes_namespace.monitoring_ns]
+# ----------------------------------------------------------
+# Fetch CRD
+# ----------------------------------------------------------
+data "http" "prometheus_rule_crd" {
+  url = "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.77.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml"
+}
 
+# Install CRD before anything else
+resource "null_resource" "install_prometheus_crds" {
+  provisioner "local-exec" {
+    command = <<-EOT
+      echo "Installing PrometheusRule CRD..."
+      echo '${data.http.prometheus_rule_crd.response_body}' | kubectl apply --server-side -f -
+      
+      echo "Waiting for CRD to be established..."
+      kubectl wait --for condition=established --timeout=120s crd/prometheusrules.monitoring.coreos.com
+      
+      echo "✓ CRD is ready!"
+    EOT
+  }
+  
+  triggers = {
+    crd_hash = sha256(data.http.prometheus_rule_crd.response_body)
+  }
+}
+
+resource "helm_release" "prometheus" {
+  depends_on = [
+    kubernetes_namespace.monitoring_ns,
+    null_resource.install_prometheus_crds
+  ]
+  
   name       = "kube-prometheus-stack"
   namespace  = kubernetes_namespace.monitoring_ns.metadata[0].name
   repository = "https://prometheus-community.github.io/helm-charts"
   chart      = "kube-prometheus-stack"
   version    = "61.2.0"
-
-  create_namespace = false
-  wait             = true
-  timeout          = 600
-
- values = [ 
-  local.prometheus_values
+  skip_crds  = true  # We manage CRDs separately
+  
+  wait    = true
+  timeout = 600
+  
+  values = [
+    local.prometheus_values
   ]
 }
 
+resource "kubernetes_manifest" "prometheus_rules" {
+  depends_on = [helm_release.prometheus]
+  
+  manifest = yamldecode(
+    templatefile("${path.module}/manifests/prometheus-rules.yaml", {
+      namespace = var.namespace
+    })
+  )
+}
+
 # -----------------------------------------------------
-# 3. Grafana Helm Chart
+# 5. Grafana Helm Chart
 # -----------------------------------------------------
 resource "helm_release" "grafana" {
   name       = "grafana"
@@ -62,7 +98,7 @@ resource "helm_release" "grafana" {
 }
 
 # -----------------------------------------------------
-# 4. Create Alertmanager Slack secret from CICD pipeline
+# 6. Create Alertmanager Slack secret from CICD pipeline
 # -----------------------------------------------------
 resource "kubernetes_secret" "alertmanager" {
   metadata {
@@ -80,7 +116,7 @@ resource "kubernetes_secret" "alertmanager" {
 }
 
 # -----------------------------------------------------
-# 5. Load dashboards into Grafana via ConfigMaps
+# 7. Load dashboards into Grafana via ConfigMaps
 # -----------------------------------------------------
 resource "kubernetes_config_map" "grafana_dashboards" {
   for_each = local.dashboard_paths
@@ -102,7 +138,7 @@ resource "kubernetes_config_map" "grafana_dashboards" {
 
 
 # -----------------------------------------------------
-# 6. NVIDIA DCGM GPU Exporter
+# 9. NVIDIA DCGM GPU Exporter
 # -----------------------------------------------------
 resource "helm_release" "nvidia_dcgm" {
   name       = "dcgm-exporter"

@@ -28,11 +28,13 @@ jobs:
            # Get the payload (middle part of JWT)
              PART=$(echo "$JWT" | cut -d "." -f2)
 
-           # Convert base64url to base64
+           # Convert base64url to base64 and fix padding
              SAFE=$(echo "$PART" | tr '_-' '/+')
+             PAD=$(( (4 - ${#SAFE} % 4) % 4 ))
+             SAFE="${SAFE}$(printf '=%.0s' $(seq 1 $PAD))"
 
            # Decode payload
-             PAYLOAD=$(echo "$SAFE" | base64 -d -i 2>/dev/null)
+             PAYLOAD=$(echo "$SAFE" | base64 -d)
 
              echo "OIDC TOKEN PAYLOAD:"
              echo "$PAYLOAD" | jq .

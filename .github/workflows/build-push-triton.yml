@@ -32,6 +32,8 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
+          audience: sts.amazonaws.com
+          output-env-credentials: true
 
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v2

@@ -141,3 +141,173 @@ resource "aws_iam_role_policy_attachment" "cloudwatch_agent" {
   role       = aws_iam_role.eks_node_role.name
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
 }
+
+##############################################
+# ECR Access Role for GitHub Actions (OIDC)
+# WHY: CI/CD pipeline pushes images to ECR.
+# HOW: Trusts GitHub OIDC provider.
+##############################################
+
+resource "aws_iam_role" "github_actions_ecr" {
+  name = "GitHubActionsECRRole"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Federated = "arn:aws:iam::${var.account_id}:oidc-provider/token.actions.githubusercontent.com"
+      }
+      Action = "sts:AssumeRoleWithWebIdentity"
+      Condition = {
+        StringEquals = {
+          "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
+        }
+        StringLike = {
+          "token.actions.githubusercontent.com:sub" = "repo:${var.github_repo}:*"
+        }
+      }
+    }]
+  })
+
+  tags = {
+    project = var.project
+    owner   = var.owner
+  }
+}
+
+# Attach AWS-managed ECR push policy
+resource "aws_iam_role_policy_attachment" "github_actions_ecr_attach" {
+  role       = aws_iam_role.github_actions_ecr.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser"
+}
+
+##############################################
+# Node Group Role ECR Pull
+# WHY: Worker nodes need to pull images from ECR.
+##############################################
+
+resource "aws_iam_role_policy_attachment" "gpu_nodegroup_ecr_pull" {
+  role       = aws_iam_role.eks_gpu_nodegroup.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+}
+
+##############################################
+# Cluster Autoscaler Role (IRSA)
+# WHY: Allows Kubernetes Cluster Autoscaler to scale node groups.
+##############################################
+
+resource "aws_iam_role" "cluster_autoscaler" {
+  name = "ClusterAutoscalerIRSA"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Federated = "arn:aws:iam::${var.account_id}:oidc-provider/${var.eks_oidc_provider}"
+      }
+      Action = "sts:AssumeRoleWithWebIdentity"
+      Condition = {
+        StringEquals = {
+          "${var.eks_oidc_provider}:sub" = "system:serviceaccount:kube-system:cluster-autoscaler"
+        }
+      }
+    }]
+  })
+
+  tags = {
+    project = var.project
+    owner   = var.owner
+  }
+}
+
+resource "aws_iam_policy" "cluster_autoscaler_policy" {
+  name   = "ProjectGPU-ClusterAutoscaler"
+  policy = file("${path.root}/policies/cluster-autoscaler.json")
+}
+
+resource "aws_iam_role_policy_attachment" "cluster_autoscaler_attach" {
+  role       = aws_iam_role.cluster_autoscaler.name
+  policy_arn = aws_iam_policy.cluster_autoscaler_policy.arn
+}
+
+##############################################
+# ExternalDNS Role (IRSA)
+# WHY: Allows Kubernetes ExternalDNS to manage Route53 records.
+##############################################
+
+resource "aws_iam_role" "external_dns" {
+  name = "ExternalDNSIRSA"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Federated = "arn:aws:iam::${var.account_id}:oidc-provider/${var.eks_oidc_provider}"
+      }
+      Action = "sts:AssumeRoleWithWebIdentity"
+      Condition = {
+        StringEquals = {
+          "${var.eks_oidc_provider}:sub" = "system:serviceaccount:kube-system:external-dns"
+        }
+      }
+    }]
+  })
+
+  tags = {
+    project = var.project
+    owner   = var.owner
+  }
+}
+
+resource "aws_iam_policy" "external_dns_policy" {
+  name   = "ProjectGPU-ExternalDNS"
+  policy = file("${path.root}/policies/external-dns.json")
+}
+
+resource "aws_iam_role_policy_attachment" "external_dns_attach" {
+  role       = aws_iam_role.external_dns.name
+  policy_arn = aws_iam_policy.external_dns_policy.arn
+}
+
+##############################################
+# S3 Access Role (IRSA)
+# WHY: Allows Kubernetes pods to access S3 buckets.
+##############################################
+
+resource "aws_iam_role" "s3_access" {
+  name = "S3AccessIRSA"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Federated = "arn:aws:iam::${var.account_id}:oidc-provider/${var.eks_oidc_provider}"
+      }
+      Action = "sts:AssumeRoleWithWebIdentity"
+      Condition = {
+        StringEquals = {
+          "${var.eks_oidc_provider}:sub" = "system:serviceaccount:default:s3-access"
+        }
+      }
+    }]
+  })
+
+  tags = {
+    project = var.project
+    owner   = var.owner
+  }
+}
+
+resource "aws_iam_policy" "s3_access_policy" {
+  name   = "ProjectGPU-S3Access"
+  policy = file("${path.root}/policies/s3-access.json")
+}
+
+resource "aws_iam_role_policy_attachment" "s3_access_attach" {
+  role       = aws_iam_role.s3_access.name
+  policy_arn = aws_iam_policy.s3_access_policy.arn
+}

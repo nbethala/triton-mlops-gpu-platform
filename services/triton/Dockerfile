@@ -6,7 +6,7 @@ WORKDIR /opt/tritonserver
 
 # Copy your model repository into the container
 # (adjust path if your models live elsewhere)
-COPY ./services/triton/models /models
+COPY ./models /models
 
 # Optional: copy custom configs, scripts, or entrypoints
 # COPY ./services/triton/configs /configs

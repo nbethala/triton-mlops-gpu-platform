@@ -38,12 +38,15 @@ jobs:
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Debug build context
+        run: ls -R services/triton
+
       - name: Build Triton Image
         run: |
           ECR="${{ secrets.AWS_ECR_URI }}"
           SHA=$(git rev-parse --short HEAD)
 
-          docker build -t triton:latest ./services/triton
+          docker build -t triton:latest -f services/triton/Dockerfile services/triton
 
           docker tag triton:latest $ECR:latest
           docker tag triton:latest $ECR:$SHA

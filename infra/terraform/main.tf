@@ -25,9 +25,11 @@ module "iam" {
   account_id            = var.account_id
   github_org            = var.github_org
   github_repo           = var.github_repo
-  oidc_provider_arn     = var.oidc_provider_arn     # HOW: For CI/CD role trust
-  eks_oidc_provider_arn = var.eks_oidc_provider_arn # HOW: For IRSA trust
-  eks_oidc_provider_sub = var.eks_oidc_provider_sub # HOW: For IRSA subject matching
+  oidc_provider_arn     = var.oidc_provider_arn        # HOW: For CI/CD role trust
+  eks_oidc_provider_arn = module.eks.oidc_provider_arn # HOW: For IRSA trust
+  eks_oidc_provider_sub = module.eks.oidc_provider_sub # HOW: For IRSA subject matching
+
+  eks_oidc_provider = replace(module.eks.oidc_provider_arn, "https://", "")
 }
 
 ##############################################

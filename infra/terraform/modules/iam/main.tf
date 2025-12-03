@@ -186,6 +186,22 @@ resource "aws_iam_role_policy_attachment" "github_actions_ecr_attach" {
 # Node Group Role ECR Pull
 # WHY: Worker nodes need to pull images from ECR.
 ##############################################
+# Trust policy for GPU nodegroup role
+data "aws_iam_policy_document" "eks_gpu_nodegroup" {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["ec2.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "eks_gpu_nodegroup" {
+  name               = "eks-gpu-nodegroup-role"
+ assume_role_policy = data.aws_iam_policy_document.eks_gpu_nodegroup.json
+}
 
 resource "aws_iam_role_policy_attachment" "gpu_nodegroup_ecr_pull" {
   role       = aws_iam_role.eks_gpu_nodegroup.name
@@ -210,7 +226,7 @@ resource "aws_iam_role" "cluster_autoscaler" {
       Action = "sts:AssumeRoleWithWebIdentity"
       Condition = {
         StringEquals = {
-          "${var.eks_oidc_provider}:sub" = "system:serviceaccount:kube-system:cluster-autoscaler"
+          "${var.eks_oidc_provider}:sub" = var.eks_oidc_provider_sub
         }
       }
     }]

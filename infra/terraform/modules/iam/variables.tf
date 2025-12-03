@@ -83,3 +83,8 @@ variable "common_tags" {
   type    = map(string)
   default = {}
 }
+
+variable "eks_oidc_provider" {
+  type        = string
+  description = "OIDC provider ID string (issuer URL without https://)"
+}

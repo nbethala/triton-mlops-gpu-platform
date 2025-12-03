@@ -9,3 +9,11 @@ output "cluster_endpoint" {
 output "cluster_certificate_authority" {
   value = aws_eks_cluster.gpu_e2e.certificate_authority[0].data
 }
+
+output "oidc_provider_arn" {
+  value = aws_eks_cluster.gpu_e2e.identity[0].oidc[0].issuer
+}
+
+output "oidc_provider_sub" {
+  value = "system:serviceaccount:kube-system:cluster-autoscaler"
+}

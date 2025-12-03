@@ -46,7 +46,9 @@ jobs:
           ECR="${{ secrets.AWS_ECR_URI }}"
           SHA=$(git rev-parse --short HEAD)
 
-          docker build -t triton:latest -f services/triton/Dockerfile services/triton
+          docker build -t triton:latest \
+           -f services/triton/Dockerfile \
+           services/triton
 
           docker tag triton:latest $ECR:latest
           docker tag triton:latest $ECR:$SHA
@@ -58,3 +60,11 @@ jobs:
 
           docker push $ECR:latest
           docker push $ECR:$SHA
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --region us-east-1 --name mlops-gpu-eks
+
+      - name: Deploy Triton Pod
+        run: |
+          kubectl apply -f k8s/triton-deployment.yaml

@@ -1,0 +1,11 @@
+# Ignore everything by default
+**
+
+# But keep the Dockerfile itself
+!Dockerfile
+
+# Keep the models directory and all its contents
+!models/**
+
+!requirements.txt
+!scripts/**

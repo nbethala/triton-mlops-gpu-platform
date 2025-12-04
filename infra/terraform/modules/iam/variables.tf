@@ -88,3 +88,8 @@ variable "eks_oidc_provider" {
   type        = string
   description = "OIDC provider ID string (issuer URL without https://)"
 }
+
+variable "alb_controller_sub" {
+  description = "alb_oidc_provider_sub tag for resources"
+  type        = string
+}

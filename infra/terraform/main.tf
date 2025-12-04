@@ -22,14 +22,19 @@ module "iam" {
   cluster_name = var.cluster_name
 
   # WHY: Needed for trust policies and OIDC wiring.
-  account_id            = var.account_id
-  github_org            = var.github_org
-  github_repo           = var.github_repo
-  oidc_provider_arn     = var.oidc_provider_arn        # HOW: For CI/CD role trust
-  eks_oidc_provider_arn = module.eks.oidc_provider_arn # HOW: For IRSA trust
+  account_id        = var.account_id
+  github_org        = var.github_org
+  github_repo       = var.github_repo
+  oidc_provider_arn = var.oidc_provider_arn # HOW: For CI/CD role trust
+  #eks_oidc_provider_arn = module.eks.oidc_provider_arn # HOW: For IRSA trust
   eks_oidc_provider_sub = module.eks.oidc_provider_sub # HOW: For IRSA subject matching
+  alb_controller_sub    = var.alb_controller_sub       # HOW: ALB Controller Role (IRSA)
 
-  eks_oidc_provider = replace(module.eks.oidc_provider_arn, "https://", "")
+
+  #eks_oidc_provider = replace(module.eks.oidc_provider_arn, "https://", "")
+
+  eks_oidc_provider_arn = var.eks_oidc_provider_arn
+  eks_oidc_provider     = var.eks_oidc_provider
 }
 
 ##############################################
@@ -127,4 +132,3 @@ module "monitoring" {
   prometheus_chart_version = "47.7.0"
   grafana_chart_version    = "9.5.1"
 }
-

@@ -110,3 +110,12 @@ variable "grafana_chart_version" {
   default     = "7.3.0" # example stable version
 }
 
+variable "alb_controller_sub" {
+  description = "OIDC sub for ALB controller service account"
+  type        = string
+}
+
+variable "eks_oidc_provider" {
+  description = "Issuer string (without https://) for IRSA condition keys"
+  type        = string
+}

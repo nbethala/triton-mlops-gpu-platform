@@ -12,8 +12,9 @@ oidc_provider_arn = "arn:aws:iam::478253497479:oidc-provider/token.actions.githu
 # -------------------------
 # EKS OIDC (IRSA for pods)
 # -------------------------
-eks_oidc_provider_arn = "arn:aws:iam::478253497479:oidc-provider/oidc.eks.us-east-1.amazonaws.com/id/EXAMPLE"
+eks_oidc_provider_arn = "arn:aws:iam::478253497479:oidc-provider/oidc.eks.us-east-1.amazonaws.com/id/0EF15E7DCFEC9A40A61BB505FBF0BD65"
 eks_oidc_provider_sub = "system:serviceaccount:default:triton-sa"
+eks_oidc_provider     = "oidc.eks.us-east-1.amazonaws.com/id/0EF15E7DCFEC9A40A61BB505FBF0BD65"
 
 
 # -------------------------
@@ -21,6 +22,11 @@ eks_oidc_provider_sub = "system:serviceaccount:default:triton-sa"
 # -------------------------
 account_id = "478253497479"
 region     = "us-east-1"
+
+# -----------------------------
+# ALB Controller Role (IRSA)
+# -----------------------------
+alb_controller_sub = "system:serviceaccount:kube-system:aws-load-balancer-controller"
 
 # -------------------------
 # Resources

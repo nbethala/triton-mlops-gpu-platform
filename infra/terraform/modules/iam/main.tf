@@ -60,11 +60,13 @@ resource "aws_iam_role" "alb_controller" {
     Version = "2012-10-17"
     Statement = [{
       Effect    = "Allow"
-      Principal = { Federated = var.eks_oidc_provider_arn }
+      Principal = {
+         Federated = var.eks_oidc_provider_arn
+      }
       Action    = "sts:AssumeRoleWithWebIdentity"
       Condition = {
         StringEquals = {
-          "${var.eks_oidc_provider_sub}:sub" = "system:serviceaccount:kube-system:aws-load-balancer-controller"
+             "${var.eks_oidc_provider}:sub"  = var.alb_controller_sub
         }
       }
     }]
@@ -76,14 +78,15 @@ resource "aws_iam_role" "alb_controller" {
   }
 }
 
-resource "aws_iam_policy" "alb_policy" {
-  name   = "AWSLoadBalancerControllerPolicy"
-  policy = file("${path.root}/policies/alb.json")
+resource "aws_iam_policy" "alb_controller_policy" {
+  name        = "ALBControllerIAMPolicy"
+  description = "Permissions for AWS Load Balancer Controller"
+  policy      = file("${path.root}/policies/alb-controller.json")
 }
 
-resource "aws_iam_role_policy_attachment" "alb_attach" {
+resource "aws_iam_role_policy_attachment" "alb_controller_attach" {
   role       = aws_iam_role.alb_controller.name
-  policy_arn = aws_iam_policy.alb_policy.arn
+  policy_arn = aws_iam_policy.alb_controller_policy.arn
 }
 
 # -----------------------------
@@ -327,3 +330,60 @@ resource "aws_iam_role_policy_attachment" "s3_access_attach" {
   role       = aws_iam_role.s3_access.name
   policy_arn = aws_iam_policy.s3_access_policy.arn
 }
+
+#############################################################
+# GitHub Actions OIDC role to allow EKS operations
+# calls policy: policies/eks-ci-cd.json
+############################################################
+resource "aws_iam_role" "github_actions_role" {
+  name = "triton-mlops-github-actions-oidc-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Federated = "arn:aws:iam::478253497479:oidc-provider/token.actions.githubusercontent.com"
+        }
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Condition = {
+          StringEquals = {
+            "token.actions.githubusercontent.com:sub" = "repo:nbethala/triton-mlops-gpu-platform:*"
+          }
+        }
+      }
+    ]
+  })
+}
+resource "aws_iam_policy" "eks_ci_cd_policy" {
+  name        = "triton-mlops-github-eks-ci-cd-policy"
+  description = "Permissions for GitHub Actions to manage EKS"
+  policy      =  file("${path.root}/policies/eks-ci-cd.json")
+}
+
+resource "aws_iam_role_policy_attachment" "eks_ci_cd_attach" {
+  role       = aws_iam_role.github_actions_role.name
+  policy_arn = aws_iam_policy.eks_ci_cd_policy.arn
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

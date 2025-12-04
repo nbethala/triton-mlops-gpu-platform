@@ -13,9 +13,14 @@ permissions:
 
 env:
   AWS_REGION: us-east-1
+  AWS_DEFAULT_REGION: us-east-1
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
   TRITON_NAMESPACE: triton
   MONITORING_NAMESPACE: monitoring
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
 jobs:
 
@@ -70,7 +75,7 @@ jobs:
            echo "Cluster name: $CLUSTER_NAME"
 
            aws eks update-kubeconfig \
-             --region $AWS_REGION \
+             --region us-east-1 \
              --name $CLUSTER_NAME
 
       - name: Verify K8s Connection

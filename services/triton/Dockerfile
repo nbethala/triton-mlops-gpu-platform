@@ -1,5 +1,5 @@
 # services/triton/Dockerfile
-FROM nvcr.io/nvidia/tritonserver:24.01-py3
+FROM nvcr.io/nvidia/tritonserver:24.01-py3-min
 WORKDIR /opt/tritonserver
 
 # Do NOT copy models into the image

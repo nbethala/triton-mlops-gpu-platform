@@ -68,8 +68,14 @@ jobs:
       # ------------------------------
       - name: Export Terraform outputs
         run: |
-          CLUSTER_NAME=$(terraform -chdir=infra/terraform \
+          TF_DIR="infra/terraform"
+
+          # initialize terraform for outputs to work
+          terraform -chdir="$TF_DIR" init -input=false
+
+          CLUSTER_NAME=$(terraform -chdir="TF_DIR" \
             output -raw eks_cluster_name)
+
           echo "EKS_CLUSTER_NAME=$CLUSTER_NAME" >> $GITHUB_ENV
 
       # ------------------------------
@@ -80,6 +86,7 @@ jobs:
           aws eks update-kubeconfig \
             --region us-east-1 \
             --name "$EKS_CLUSTER_NAME"
+
           kubectl config view
           kubectl get nodes
 
@@ -87,72 +94,73 @@ jobs:
         run: |
           kubectl get nodes
 
-      # ------------------------------
-      # Create Alertmanager Secret (Slack webhook only in GitHub Secrets)
-      # ------------------------------
-      - name: Create Alertmanager Config Secret
+      - name: Create Alertmanager Secret
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
         run: |
-          cat <<EOF > alertmanager.yaml
-          global:
-            resolve_timeout: 5m
+          set -e
 
-          route:
-            receiver: "slack"
+          # Delete old secret if exists
+          kubectl -n "${MONITORING_NAMESPACE}" delete secret \
+            alertmanager-main --ignore-not-found
 
-          receivers:
-            - name: "slack"
-              slack_configs:
-                - api_url: "${{ secrets.SLACK_WEBHOOK_URL }}"
-                  channel: "${{ secrets.SLACK_CHANNEL }}"
-                  send_resolved: true
-                  title: "Triton GPU Alert"
-                  text: "Alert: {{ .CommonAnnotations.summary }}"
-
-          EOF
-
-          kubectl -n $MONITORING_NAMESPACE delete secret alertmanager-main \
-          --ignore-not-found
-
-          kubectl -n $MONITORING_NAMESPACE create secret generic \
-          alertmanager-main \
-          --from-file=alertmanager.yaml
+          # Create new secret with inline YAML
+          kubectl -n "${MONITORING_NAMESPACE}" create secret generic \
+            alertmanager-main \
+            --from-literal=api_url="${SLACK_WEBHOOK_URL}" \
+            --from-literal=channel="${SLACK_CHANNEL}"
 
       # ------------------------------
       # Wait for monitoring stack (terraform-managed prometheus stack)
       # ------------------------------
       - name: Wait for Prometheus Operator readiness
         run: |
-          kubectl -n $MONITORING_NAMESPACE rollout status \
-          deployment/kube-prometheus-stack-operator \
-          --timeout=5m
+          set -e
+          echo "Waiting for Prometheus Operator..."
+
+          kubectl -n "${MONITORING_NAMESPACE}" rollout status \
+            deployment/kube-prometheus-stack-operator \
+            --timeout=5m || {
+
+             echo "Main operator name not found, trying fallback..."
+
+             kubectl -n "${MONITORING_NAMESPACE}" rollout status \
+               deployment/prometheus-operator \
+               --timeout=5m
+            }
 
       # ------------------------------
       # DEPLOY TRITON (Helm Chart Generated)
       # ------------------------------
       - name: Deploy Triton Inference Server
         run: |
+          set -e
           helm upgrade --install triton \
-            services/triton/helm \
-            --namespace $TRITON_NAMESPACE \
+            ./services/triton/helm \
+            --namespace "${TRITON_NAMESPACE}" \
             --create-namespace \
             -f services/triton/helm/values.yaml
 
       - name: Wait for Triton Deployment
         run: |
-          kubectl -n $TRITON_NAMESPACE rollout status \
-          deployment/triton \
-          --timeout=5m
+          set -e
+          echo "Waiting for Triton deployment..."
+          kubectl -n "${TRITON_NAMESPACE}" rollout status \
+            deployment/triton \
+            --timeout=5m
 
       # ------------------------------
       # NVIDIA DCGM Exporter (GPU Metrics)
       # ------------------------------
       - name: Deploy NVIDIA DCGM Exporter
         run: |
+          set -e
           helm repo add nvidia https://nvidia.github.io/dcgm-exporter
           helm repo update
           helm upgrade --install dcgm-exporter \
             nvidia/dcgm-exporter \
-            --namespace $MONITORING_NAMESPACE \
+            --namespace "${MONITORING_NAMESPACE}" \
             --create-namespace
 
       # ------------------------------

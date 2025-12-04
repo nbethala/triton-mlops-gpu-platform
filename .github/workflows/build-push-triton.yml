@@ -68,9 +68,19 @@ jobs:
           docker push $ECR:latest
           docker push $ECR:$SHA
 
+      # --------------------------------------------------------
+      # Terraform must be installed before using it
+      # --------------------------------------------------------
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.6.6
+
       - name: Get cluster name
         run: |
-          CLUSTER_NAME=$(terraform output -raw eks_cluster_name)
+          terraform -chdir=infra/terraform init -input=false
+          CLUSTER_NAME=$(terraform -chdir=infra/terraform \
+            output -raw eks_cluster_name)
           echo "EKS_CLUSTER_NAME=$CLUSTER_NAME" >> $GITHUB_ENV
 
       - name: Update kubeconfig

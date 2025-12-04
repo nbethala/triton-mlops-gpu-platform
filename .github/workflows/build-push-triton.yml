@@ -78,10 +78,7 @@ jobs:
 
       - name: Get cluster name
         run: |
-          terraform -chdir=infra/terraform init -input=false
-          CLUSTER_NAME=$(terraform -chdir=infra/terraform \
-            output -raw eks_cluster_name)
-          echo "EKS_CLUSTER_NAME=$CLUSTER_NAME" >> $GITHUB_ENV
+          echo "EKS_CLUSTER_NAME=${{ secrets.EKS_CLUSTER_NAME }}" >> $GITHUB_ENV
 
       - name: Update kubeconfig
         run: |

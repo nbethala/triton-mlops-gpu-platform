@@ -64,19 +64,12 @@ jobs:
           terraform_version: 1.7.3  # Change to your required version
 
       # ------------------------------
-      # export terraform outputs
+      # cluster name from github secrets
       # ------------------------------
-      - name: Export Terraform outputs
+      - name: Set EKS Cluster Name
         run: |
-          TF_DIR="infra/terraform"
-
-          # initialize terraform for outputs to work
-          terraform -chdir="$TF_DIR" init -input=false
-
-          CLUSTER_NAME=$(terraform -chdir="TF_DIR" \
-            output -raw eks_cluster_name)
-
-          echo "EKS_CLUSTER_NAME=$CLUSTER_NAME" >> $GITHUB_ENV
+         # Export secret value as environment variable
+          echo "EKS_CLUSTER_NAME=${{ secrets.EKS_CLUSTER_NAME }}" >> $GITHUB_ENV
 
       # ------------------------------
       # update Kubeconfig for EKS

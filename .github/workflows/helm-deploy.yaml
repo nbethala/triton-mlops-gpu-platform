@@ -1,7 +1,7 @@
 ---
 name: Helm Deploy Triton Platform + Monitoring
 
-"on":
+on:
   workflow_run:
     workflows: ["Terraform Infra Provision"]
     types:
@@ -65,8 +65,8 @@ jobs:
         run: |
           CLUSTER_NAME=$(
             terraform -chdir=infra/terraform \
-               output -raw eks_cluster_name)
-
+               output -raw eks_cluster_name
+             )
              echo "Cluster name: $CLUSTER_NAME"
 
               aws eks update-kubeconfig \

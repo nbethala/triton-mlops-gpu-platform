@@ -50,7 +50,6 @@ jobs:
 
       - name: Install Helm
         uses: azure/setup-helm@v3
-      
       # ------------------------------
       # Setup Terraform
       # ------------------------------
@@ -67,7 +66,10 @@ jobs:
           CLUSTER_NAME=$(
             terraform -chdir=infra/terraform \
                output -raw eks_cluster_name)
-               aws eks update-kubeconfig \
+
+             echo "Cluster name: $CLUSTER_NAME"
+
+              aws eks update-kubeconfig \
                --region $AWS_REGION \
                 --name $CLUSTER_NAME
 

@@ -1,13 +1,7 @@
 ---
 name: Build & Push Triton Image
-uses: docker/build-push-action@v5
-with:
-  context: .
-  push: true
-  tags: ghcr.io/${{ github.repository }}/triton:latest
-  progress: plain
 
-"on":
+on:
   push:
     branches: ["main"]
     paths:

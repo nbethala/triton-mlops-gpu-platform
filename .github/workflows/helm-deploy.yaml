@@ -66,15 +66,16 @@ jobs:
           CLUSTER_NAME=$(
             terraform -chdir=infra/terraform \
                output -raw eks_cluster_name
-             )
-             echo "Cluster name: $CLUSTER_NAME"
+           )
+           echo "Cluster name: $CLUSTER_NAME"
 
-              aws eks update-kubeconfig \
-               --region $AWS_REGION \
-                --name $CLUSTER_NAME
+           aws eks update-kubeconfig \
+             --region $AWS_REGION \
+             --name $CLUSTER_NAME
 
       - name: Verify K8s Connection
-        run: kubectl get nodes
+        run: |
+          kubectl get nodes
 
       # ------------------------------
       # Create Alertmanager Secret (Slack webhook only in GitHub Secrets)

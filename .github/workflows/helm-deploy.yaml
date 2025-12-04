@@ -15,6 +15,7 @@ env:
   AWS_REGION: us-east-1
   TRITON_NAMESPACE: triton
   MONITORING_NAMESPACE: monitoring
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
 
@@ -49,6 +50,14 @@ jobs:
 
       - name: Install Helm
         uses: azure/setup-helm@v3
+      
+      # ------------------------------
+      # Setup Terraform
+      # ------------------------------
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.7.3  # Change to your required version
 
       # ------------------------------
       # Kubeconfig for EKS

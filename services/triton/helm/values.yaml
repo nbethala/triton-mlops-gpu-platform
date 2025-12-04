@@ -8,7 +8,7 @@ image:
 serviceAccount:
   create: true
   name: triton-sa
-  annotations:
+  annotations: {}
     # IRSA annotation - filled by Helm upgrade via --set or edit manually
     # eks.amazonaws.com/role-arn: arn:aws:iam::<ACCOUNT_ID>:role/triton-pod-role
 
@@ -27,7 +27,6 @@ tolerations:
     operator: "Exists"
     effect: "NoSchedule"
 
-# model repo config (init-container will sync from S3)
 modelRepo:
   s3:
     bucket: "<YOUR_MODEL_BUCKET>"

@@ -45,10 +45,10 @@ jobs:
       # Install CLI Tools
       # ------------------------------
       - name: Install kubectl
-        uses: aws/setup-kubectl@v4
+        uses: azure/setup-kubectl@v3
 
       - name: Install Helm
-        uses: aws/setup-helm@v4
+        uses: azure/setup-helm@v3
 
       # ------------------------------
       # Kubeconfig for EKS

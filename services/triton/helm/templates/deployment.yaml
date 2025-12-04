@@ -1,11 +1,9 @@
-#This deploys Triton, mounts models, sets GPU resources, enables metrics, and exposes HTTP/GRPC.
-
-
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: triton
-  namespace: {{ .Release.Namespace }}
+  name: "{{ .Release.Name }}"
+  namespace: "{{ .Release.Namespace }}"
   labels:
     app: triton
 spec:
@@ -19,43 +17,35 @@ spec:
         app: triton
     spec:
       serviceAccountName: {{ .Values.serviceAccount.name }}
+
       nodeSelector:
-{{ toYaml .Values.nodeSelector | indent 8 }}
+        {{- toYaml .Values.nodeSelector | nindent 8 }}
+
       tolerations:
-{{ toYaml .Values.tolerations | indent 8 }}
+        {{- toYaml .Values.tolerations | nindent 8 }}
+
       containers:
         - name: triton
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          imagePullPolicy: "{{ .Values.image.pullPolicy }}"
           ports:
-            - containerPort: {{ .Values.ports.http }}
-              name: http
-            - containerPort: {{ .Values.ports.grpc }}
-              name: grpc
-            - containerPort: {{ .Values.ports.metrics }}
-              name: metrics
+            - name: http
+              containerPort: {{ .Values.ports.http }}
+            - name: grpc
+              containerPort: {{ .Values.ports.grpc }}
+            - name: metrics
+              containerPort: {{ .Values.ports.metrics }}
+
           resources:
             limits:
-{{ toYaml .Values.resources.limits | indent 14 }}
+              {{- toYaml .Values.resources.limits | nindent 14 }}
             requests:
-{{ toYaml .Values.resources.requests | indent 14 }}
+              {{- toYaml .Values.resources.requests | nindent 14 }}
+
           volumeMounts:
             - name: model-repo
               mountPath: /models
+
       initContainers:
         - name: sync-models
           image: amazon/aws-cli:2.16.19
-          command:
-            - /bin/sh
-            - -c
-            - |
-              set -e
-              if [ -n "{{ .Values.modelRepo.s3.bucket }}" ]; then
-                aws s3 sync s3://{{ .Values.modelRepo.s3.bucket }}/{{ .Values.modelRepo.s3.prefix }} /models --region {{ .Values.modelRepo.s3.region }}
-              fi
-          volumeMounts:
-            - name: model-repo
-              mountPath: /models
-      volumes:
-        - name: model-repo
-          emptyDir: {}

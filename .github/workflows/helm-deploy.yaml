@@ -88,7 +88,16 @@ jobs:
           }
 
       # ------------------------------
-      # Deploy Triton
+      # Deploy Triton Manifests
+      # ------------------------------
+      - name: Deploy Triton Manifests
+        run: |
+          kubectl apply -f k8s/triton-deployment.yaml
+          kubectl apply -f k8s/triton-models-pvc.yaml
+          kubectl apply -f k8s/triton-service.yaml
+
+      # ------------------------------
+      # Deploy Triton server via helm
       # ------------------------------
       - name: Deploy Triton Server
         run: |

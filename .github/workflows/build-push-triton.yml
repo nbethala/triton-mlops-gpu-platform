@@ -31,6 +31,14 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Free disk space
+        run: |
+          docker system prune -af --volumes
+          df -h
+
+      - name: Debug build context
+        run: ls -R services/triton
+
       # -------------------------------
       # Docker Build + Push
       # -------------------------------
@@ -54,23 +62,3 @@ jobs:
 
           docker push $ECR:latest
           docker push $ECR:$SHA
-
-      # -------------------------------
-      # Kubernetes Deploy
-      # -------------------------------
-      - name: Set cluster env var
-        env:
-          CLUSTER: ${{ secrets.EKS_CLUSTER_NAME }}
-        run: echo "EKS_CLUSTER_NAME=$CLUSTER" >> $GITHUB_ENV
-
-      - name: Update kubeconfig
-        run: |
-          aws eks update-kubeconfig \
-            --region ${{ secrets.AWS_REGION }} \
-            --name $EKS_CLUSTER_NAME
-
-      - name: Verify cluster
-        run: kubectl get nodes
-
-      - name: Deploy Triton
-        run: kubectl apply -f k8s/triton-deployment.yaml

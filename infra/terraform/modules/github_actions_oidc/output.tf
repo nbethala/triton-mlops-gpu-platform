@@ -8,17 +8,17 @@ output "ecr_policy_arn" {
   value       = aws_iam_policy.ecr_policy.arn
 }
 
-output "s3_policy_arn" {
-  description = "ARN of the S3 policy attached to the role"
-  value       = aws_iam_policy.s3_policy.arn
-}
+#output "s3_policy_arn" {
+#  description = "ARN of the S3 policy attached to the role"
+#  value       = aws_iam_policy.s3_policy.arn
+#}
 
-output "eks_terraform_policy_arn" {
-  description = "ARN of the EKS Terraform policy attached to the role"
-  value       = aws_iam_policy.eks_terraform_policy.arn
-}
+#output "eks_terraform_policy_arn" {
+#  description = "ARN of the EKS Terraform policy attached to the role"
+#  value       = aws_iam_policy.eks_terraform_policy.arn
+#}
 
-output "misc_policy_arn" {
-  description = "ARN of the misc CloudWatch/ELB policy attached to the role"
-  value       = aws_iam_policy.misc_policy.arn
-}
+#output "misc_policy_arn" {
+#  description = "ARN of the misc CloudWatch/ELB policy attached to the role"
+#  value       = aws_iam_policy.misc_policy.arn
+#}

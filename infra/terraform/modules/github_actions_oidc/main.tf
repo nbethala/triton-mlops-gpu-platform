@@ -43,14 +43,9 @@ resource "aws_iam_policy" "ecr_policy" {
           "ecr:GetDownloadUrlForLayer",
           "ecr:BatchGetImage",
           "ecr:PutImage",
-          "ecr:InitiateLayerUpload",
-          "ecr:UploadLayerPart",
-          "ecr:CompleteLayerUpload",
           "ecr:CreateRepository",
-          "ecr:DescribeRepositories",
-          "ecr:ListImages",
           "ecr:TagResource"
-        ]
+        ],
         Resource = "*"
       }
     ]
@@ -58,118 +53,9 @@ resource "aws_iam_policy" "ecr_policy" {
 }
 
 # -----------------------------
-# S3 Policy
+# Attach policies to OIDC role
 # -----------------------------
-resource "aws_iam_policy" "s3_policy" {
-  name        = "${var.project}-github-s3-policy"
-  description = "Allow GitHub Actions to sync model files and read/write Terraform state"
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Sid    = "S3ModelAccess"
-        Effect = "Allow"
-        Action = [
-          "s3:GetObject",
-          "s3:PutObject",
-          "s3:DeleteObject",
-          "s3:ListBucket",
-          "s3:PutObjectAcl",
-          "s3:GetObjectAcl"
-        ]
-        Resource = concat(
-          var.s3_model_bucket_arns,
-          [for arn in var.s3_model_bucket_arns : "${arn}/*"]
-        )
-      }
-    ]
-  })
-}
-
-# -----------------------------
-# EKS + Nodegroup + IAM Full Access Policy
-# -----------------------------
-resource "aws_iam_policy" "eks_terraform_policy" {
-  name        = "${var.project}-github-eks-terraform-policy"
-  description = "Full permissions to allow Terraform via GitHub Actions to create/manage EKS + IAM + Nodegroups"
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Sid    = "EksFullAccess"
-        Effect = "Allow"
-        Action = [
-          "eks:*",
-          "ec2:*",
-          "autoscaling:*",
-          "iam:*"
-        ]
-        Resource = "*"
-      }
-    ]
-  })
-}
-
-# -----------------------------
-# CloudWatch + ELB Policy
-# -----------------------------
-resource "aws_iam_policy" "misc_policy" {
-  name        = "${var.project}-github-misc-policy"
-  description = "CloudWatch, ELB, and supporting actions"
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Sid    = "CloudWatch"
-        Effect = "Allow"
-        Action = [
-          "cloudwatch:PutMetricData",
-          "logs:CreateLogGroup",
-          "logs:CreateLogStream",
-          "logs:PutLogEvents",
-          "logs:DescribeLogGroups",
-          "logs:DescribeLogStreams"
-        ]
-        Resource = "*"
-      },
-      {
-        Sid    = "ELB"
-        Effect = "Allow"
-        Action = [
-          "elasticloadbalancing:CreateLoadBalancer",
-          "elasticloadbalancing:DeleteLoadBalancer",
-          "elasticloadbalancing:CreateTargetGroup",
-          "elasticloadbalancing:DeleteTargetGroup",
-          "elasticloadbalancing:RegisterTargets",
-          "elasticloadbalancing:DeregisterTargets",
-          "elasticloadbalancing:DescribeLoadBalancers",
-          "elasticloadbalancing:DescribeTargetGroups"
-        ]
-        Resource = "*"
-      }
-    ]
-  })
-}
-
-# -----------------------------
-# Attach all policies to the OIDC role
-# -----------------------------
-resource "aws_iam_role_policy_attachment" "attach_ecr" {
+resource "aws_iam_role_policy_attachment" "admin_attach" {
   role       = aws_iam_role.github_actions_oidc.name
-  policy_arn = aws_iam_policy.ecr_policy.arn
-}
-
-resource "aws_iam_role_policy_attachment" "attach_s3" {
-  role       = aws_iam_role.github_actions_oidc.name
-  policy_arn = aws_iam_policy.s3_policy.arn
-}
-
-resource "aws_iam_role_policy_attachment" "attach_eks_tf" {
-  role       = aws_iam_role.github_actions_oidc.name
-  policy_arn = aws_iam_policy.eks_terraform_policy.arn
-}
-
-resource "aws_iam_role_policy_attachment" "attach_misc" {
-  role       = aws_iam_role.github_actions_oidc.name
-  policy_arn = aws_iam_policy.misc_policy.arn
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }

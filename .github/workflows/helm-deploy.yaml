@@ -4,8 +4,7 @@ name: Helm Deploy Triton Platform + Monitoring
 on:
   workflow_run:
     workflows: ["Terraform Infra Provision"]
-    types:
-      - completed
+    types: [completed]
 
 permissions:
   id-token: write
@@ -13,14 +12,8 @@ permissions:
 
 env:
   AWS_REGION: us-east-1
-  AWS_DEFAULT_REGION: us-east-1
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
   TRITON_NAMESPACE: triton
   MONITORING_NAMESPACE: monitoring
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
 
 jobs:
 
@@ -39,7 +32,7 @@ jobs:
       # ------------------------------
       # AWS Auth via OIDC
       # ------------------------------
-      - name: Configure AWS Credentials (OIDC)
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
@@ -48,112 +41,80 @@ jobs:
           output-env-credentials: true
 
       # ------------------------------
-      # Install CLI Tools
+      # Install CLIs
       # ------------------------------
       - name: Install kubectl
         uses: azure/setup-kubectl@v3
 
       - name: Install Helm
         uses: azure/setup-helm@v3
-      # ------------------------------
-      # Setup Terraform
-      # ------------------------------
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.7.3  # Change to your required version
 
       # ------------------------------
-      # cluster name from github secrets
+      # Inject cluster name from secrets
       # ------------------------------
       - name: Set EKS Cluster Name
         run: |
-         # Export secret value as environment variable
-          echo "EKS_CLUSTER_NAME=${{ secrets.EKS_CLUSTER_NAME }}" >> $GITHUB_ENV
+          echo "EKS_CLUSTER_NAME=${{ secrets.EKS_CLUSTER_NAME }}" \
+            >> "$GITHUB_ENV"
 
       # ------------------------------
-      # update Kubeconfig for EKS
+      # Update Kubeconfig
       # ------------------------------
-      - name: update kubeconfig
+      - name: Update kubeconfig
         run: |
           aws eks update-kubeconfig \
-            --region us-east-1 \
+            --region "$AWS_REGION" \
             --name "$EKS_CLUSTER_NAME"
 
           kubectl config view
           kubectl get nodes
 
-      - name: Verify K8s Connection
-        run: |
-          kubectl get nodes
-
-      - name: Create Alertmanager Secret
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
-        run: |
-          set -e
-
-          # Delete old secret if exists
-          kubectl -n "${MONITORING_NAMESPACE}" delete secret \
-            alertmanager-main --ignore-not-found
-
-          # Create new secret with inline YAML
-          kubectl -n "${MONITORING_NAMESPACE}" create secret generic \
-            alertmanager-main \
-            --from-literal=api_url="${SLACK_WEBHOOK_URL}" \
-            --from-literal=channel="${SLACK_CHANNEL}"
-
       # ------------------------------
-      # Wait for monitoring stack (terraform-managed prometheus stack)
+      # Wait for Monitoring Stack
       # ------------------------------
-      - name: Wait for Prometheus Operator readiness
+      - name: Wait for Prometheus Operator
         run: |
           set -e
           echo "Waiting for Prometheus Operator..."
 
-          kubectl -n "${MONITORING_NAMESPACE}" rollout status \
+          kubectl -n "$MONITORING_NAMESPACE" rollout status \
             deployment/kube-prometheus-stack-operator \
             --timeout=5m || {
 
-             echo "Main operator name not found, trying fallback..."
-
-             kubectl -n "${MONITORING_NAMESPACE}" rollout status \
-               deployment/prometheus-operator \
-               --timeout=5m
-            }
+            echo "Trying fallback deployment..."
+            kubectl -n "$MONITORING_NAMESPACE" rollout status \
+              deployment/prometheus-operator \
+              --timeout=5m
+          }
 
       # ------------------------------
-      # DEPLOY TRITON (Helm Chart Generated)
+      # Deploy Triton
       # ------------------------------
-      - name: Deploy Triton Inference Server
+      - name: Deploy Triton Server
         run: |
           set -e
           helm upgrade --install triton \
             ./services/triton/helm \
-            --namespace "${TRITON_NAMESPACE}" \
+            --namespace "$TRITON_NAMESPACE" \
             --create-namespace \
             -f services/triton/helm/values.yaml
 
       - name: Wait for Triton Deployment
         run: |
-          set -e
-          echo "Waiting for Triton deployment..."
-          kubectl -n "${TRITON_NAMESPACE}" rollout status \
-            deployment/triton \
-            --timeout=5m
+          kubectl -n "$TRITON_NAMESPACE" rollout status \
+            deployment/triton --timeout=5m
 
       # ------------------------------
-      # NVIDIA DCGM Exporter (GPU Metrics)
+      # Deploy NVIDIA DCGM Exporter
       # ------------------------------
-      - name: Deploy NVIDIA DCGM Exporter
+      - name: Deploy DCGM Exporter
         run: |
-          set -e
           helm repo add nvidia https://nvidia.github.io/dcgm-exporter
           helm repo update
+
           helm upgrade --install dcgm-exporter \
             nvidia/dcgm-exporter \
-            --namespace "${MONITORING_NAMESPACE}" \
+            --namespace "$MONITORING_NAMESPACE" \
             --create-namespace
 
       # ------------------------------

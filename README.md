@@ -121,3 +121,5 @@ Never commit secrets to Git — use .gitignore or external secret managers (e.g.
 [![Build & Push Triton Image](https://github.com/nbethala/triton-mlops-gpu-platform/actions/workflows/build-push-triton.yml/badge.svg)](https://github.com/nbethala/triton-mlops-gpu-platform/actions/workflows/build-push-triton.yml)
 
 [![Terraform Infra Provision](https://github.com/nbethala/triton-mlops-gpu-platform/actions/workflows/infra-provision.yaml/badge.svg)](https://github.com/nbethala/triton-mlops-gpu-platform/actions/workflows/infra-provision.yaml)
+
+[![Helm Deploy Triton Platform + Monitoring](https://github.com/nbethala/triton-mlops-gpu-platform/actions/workflows/helm-deploy.yaml/badge.svg)](https://github.com/nbethala/triton-mlops-gpu-platform/actions/workflows/helm-deploy.yaml)

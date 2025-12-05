@@ -1,5 +1,5 @@
 ---
-name: Helm Deploy Triton Platform + Monitoring
+name: Helm Deploy Triton + Monitoring
 
 on:
   workflow_run:
@@ -7,16 +7,14 @@ on:
     types: [completed]
 
 permissions:
-  id-token: write
   contents: read
 
 env:
   AWS_REGION: us-east-1
-  TRITON_NAMESPACE: triton
+  TRITON_NAMESPACE: inference
   MONITORING_NAMESPACE: monitoring
 
 jobs:
-
   deploy:
     name: Deploy Triton + Monitoring Stack
     runs-on: ubuntu-latest
@@ -24,24 +22,23 @@ jobs:
 
     steps:
       # ------------------------------
-      # CHECKOUT
+      # CHECKOUT REPO
       # ------------------------------
       - name: Checkout repository
         uses: actions/checkout@v4
 
       # ------------------------------
-      # AWS Auth via OIDC
+      # AWS AUTH — STATIC CREDS (RELIABLE)
       # ------------------------------
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-          audience: sts.amazonaws.com
-          output-env-credentials: true
 
       # ------------------------------
-      # Install CLIs
+      # Install kubectl + helm
       # ------------------------------
       - name: Install kubectl
         uses: azure/setup-kubectl@v3
@@ -50,15 +47,14 @@ jobs:
         uses: azure/setup-helm@v3
 
       # ------------------------------
-      # Inject cluster name from secrets
+      # Inject Cluster Name
       # ------------------------------
       - name: Set EKS Cluster Name
         run: |
-          echo "EKS_CLUSTER_NAME=${{ secrets.EKS_CLUSTER_NAME }}" \
-            >> "$GITHUB_ENV"
+          echo "EKS_CLUSTER_NAME=${{ secrets.EKS_CLUSTER_NAME }}" >> $GITHUB_ENV
 
       # ------------------------------
-      # Update Kubeconfig
+      # Update kubeconfig
       # ------------------------------
       - name: Update kubeconfig
         run: |
@@ -66,7 +62,6 @@ jobs:
             --region "$AWS_REGION" \
             --name "$EKS_CLUSTER_NAME"
 
-          kubectl config view
           kubectl get nodes
 
       # ------------------------------
@@ -79,42 +74,45 @@ jobs:
 
           kubectl -n "$MONITORING_NAMESPACE" rollout status \
             deployment/kube-prometheus-stack-operator \
-            --timeout=5m || {
+            --timeout=3m || {
 
             echo "Trying fallback deployment..."
             kubectl -n "$MONITORING_NAMESPACE" rollout status \
               deployment/prometheus-operator \
-              --timeout=5m
+              --timeout=3m
           }
 
       # ------------------------------
-      # Deploy Triton Manifests
+      # Deploy Triton Using Raw Manifests
       # ------------------------------
       - name: Deploy Triton Manifests
         run: |
-          kubectl apply -f k8s/triton-deployment.yaml
           kubectl apply -f k8s/triton-models-pvc.yaml
+          kubectl apply -f k8s/triton-deployment.yaml
           kubectl apply -f k8s/triton-service.yaml
 
       # ------------------------------
-      # Deploy Triton server via helm
+      # Wait for Triton Deployment
       # ------------------------------
-      - name: Deploy Triton Server
-        run: |
-          set -e
-          helm upgrade --install triton \
-            ./services/triton/helm \
-            --namespace "$TRITON_NAMESPACE" \
-            --create-namespace \
-            -f services/triton/helm/values.yaml
-
       - name: Wait for Triton Deployment
         run: |
           kubectl -n "$TRITON_NAMESPACE" rollout status \
             deployment/triton --timeout=5m
 
       # ------------------------------
-      # Deploy NVIDIA DCGM Exporter
+      # OPTIONAL: Deploy Triton Helm Chart
+      # ------------------------------
+      - name: Deploy Triton Helm Chart (Optional)
+        if: false  # change to true if you want to use Helm chart instead
+        run: |
+          helm upgrade --install triton \
+            ./services/triton/helm \
+            --namespace "$TRITON_NAMESPACE" \
+            --create-namespace \
+            -f services/triton/helm/values.yaml
+
+      # ------------------------------
+      # Deploy NVIDIA DCGM Exporter (GPU Metrics)
       # ------------------------------
       - name: Deploy DCGM Exporter
         run: |
@@ -127,7 +125,7 @@ jobs:
             --create-namespace
 
       # ------------------------------
-      # DONE
+      # COMPLETE
       # ------------------------------
-      - name: Complete
-        run: echo "Triton + Monitoring stack deployed successfully!"
+      - name: Deployment Complete
+        run: echo "Triton + Monitoring deployed successfully!"

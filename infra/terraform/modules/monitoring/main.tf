@@ -1,18 +1,26 @@
 terraform {
   required_providers {
-    helm = {
-      source  = "hashicorp/helm"
-    }
     kubernetes = {
-      source  = "hashicorp/kubernetes"
+      source = "hashicorp/kubernetes"
+    }
+    helm = {
+      source = "hashicorp/helm"
     }
   }
 }
 
-locals {
-  prometheus_values = file("${path.module}/values/prometheus-values.yaml")
-  grafana_values    = file("${path.module}/values/grafana-values.yaml")
-}
+#locals {
+#  prometheus_values = file("${path.module}/values/prometheus-values.yaml")
+# grafana_values    = file("${path.module}/values/grafana-values.yaml")
+
+  # Define dashboard paths if you want to load Grafana dashboards
+  # Example:
+  # {
+  #   "node-dashboard.json" = "${path.module}/dashboards/node-dashboard.json"
+  #   "gpu-dashboard.json"  = "${path.module}/dashboards/gpu-dashboard.json"
+  # }
+  # dashboard_paths = {}
+#}
 
 # -----------------------------------------------------
 # 1. Namespace: monitoring
@@ -39,8 +47,8 @@ resource "helm_release" "prometheus" {
   wait             = true
   timeout          = 600
 
- values = [ 
-  local.prometheus_values
+  values = [
+    local.prometheus_values
   ]
 }
 
@@ -99,7 +107,6 @@ resource "kubernetes_config_map" "grafana_dashboards" {
 
   depends_on = [helm_release.grafana]
 }
-
 
 # -----------------------------------------------------
 # 6. NVIDIA DCGM GPU Exporter

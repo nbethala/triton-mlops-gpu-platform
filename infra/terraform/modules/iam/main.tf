@@ -373,3 +373,42 @@ resource "aws_iam_role_policy_attachment" "github_actions_role_ecr" {
   role       = aws_iam_role.github_actions_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser"
 }
+
+
+# ##########################################################################
+#  IAM Role for EKS Nodegroup (Worker Nodes)
+# Provides permissions for EC2 instances to join the cluster,
+# pull images from ECR, and use the CNI plugin.
+############################################################################
+# IAM role for EKS nodegroup
+resource "aws_iam_role" "eks_nodegroup_role" {
+  name = "${var.project}-${var.owner}-eks-nodegroup-role"
+
+  assume_role_policy = data.aws_iam_policy_document.eks_node_assume.json
+}
+
+data "aws_iam_policy_document" "eks_node_assume" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["ec2.amazonaws.com"]
+    }
+  }
+}
+
+# Attach required policies for worker nodes
+resource "aws_iam_role_policy_attachment" "eks_nodegroup_worker" {
+  role       = aws_iam_role.eks_nodegroup_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+}
+
+resource "aws_iam_role_policy_attachment" "eks_nodegroup_cni" {
+  role       = aws_iam_role.eks_nodegroup_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+}
+
+resource "aws_iam_role_policy_attachment" "eks_nodegroup_ecr" {
+  role       = aws_iam_role.eks_nodegroup_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+}

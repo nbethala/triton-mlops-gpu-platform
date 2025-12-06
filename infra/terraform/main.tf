@@ -51,6 +51,9 @@ module "eks" {
 
   private_subnet_ids = module.vpc.private_subnet_ids # HOW: Cluster control plane runs in private subnets
   cluster_role_arn   = module.iam.cluster_role_arn   # HOW: IAM role for EKS control plane
+
+  # Pass the nodegroup role ARN from IAM module
+  nodegroup_role_arn = module.iam.eks_nodegroup_role_arn
 }
 
 ##############################################
@@ -123,12 +126,22 @@ module "ecr" {
 
 #======================================================
 # Prometheus + Grafana provisioning
-#====================================================
+#======================================================
 module "monitoring" {
-  source       = "./modules/monitoring"
+  source = "./modules/monitoring"
+
   cluster_name = module.eks.cluster_name
   namespace    = "monitoring"
+
   # optionally override chart versions
   prometheus_chart_version = "47.7.0"
   grafana_chart_version    = "9.5.1"
+
+  # 👇 Pass the Kubernetes provider from EKS down into monitoring
+  providers = {
+    kubernetes = kubernetes
+    helm       = helm
+  }
 }
+
+

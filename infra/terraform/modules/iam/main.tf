@@ -366,24 +366,3 @@ resource "aws_iam_role_policy_attachment" "eks_ci_cd_attach" {
   role       = aws_iam_role.github_actions_role.name
   policy_arn = aws_iam_policy.eks_ci_cd_policy.arn
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

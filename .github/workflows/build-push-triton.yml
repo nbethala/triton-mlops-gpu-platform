@@ -16,14 +16,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout Repo
       - uses: actions/checkout@v4
 
-      # -------------------------------
-      # AWS Credentials
-      # -------------------------------
+      - name: Debug OIDC Token
+        run: |
+          echo "AWS_ROLE_ARN=${{ steps.configure.outputs.role-to-assume }}"
+          aws sts get-caller-identity
+
       # -----------------------------------------------------
-# Configure AWS Credentials via OIDC
-# -----------------------------------------------------
+      # Configure AWS Credentials via OIDC
+      # -----------------------------------------------------
       - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:

@@ -10,10 +10,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Request OIDC token
+        id: oidc
         run: |
           echo "Requesting OIDC token..."
-          curl -sSL "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=sts.amazonaws.com" \
-            -H "Authorization: Bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" | jq .
-        env:
-          ACTIONS_ID_TOKEN_REQUEST_TOKEN: ${{ github.token }}
-          ACTIONS_ID_TOKEN_REQUEST_URL: ${{ github.api_url }}/repos/${{ github.repository }}/actions/oidc/token
+          TOKEN=$(curl -sSL "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=sts.amazonaws.com" \
+            -H "Authorization: Bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" | jq -r .value)
+          echo "OIDC_TOKEN=$TOKEN" >> $GITHUB_ENV
+          echo "Token payload:"
+          echo $TOKEN | cut -d "." -f2 | base64 -d | jq .

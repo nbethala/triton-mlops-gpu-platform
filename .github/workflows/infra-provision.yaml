@@ -33,8 +33,9 @@ jobs:
       - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_OIDC_ROLE }}
-          role-session-name: GitHubActionsOIDCSession
+          role-to-assume: arn:aws:iam::478253497479:role/triton-mlops-github-actions-oidc-role
+          # role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_OIDC_ROLE }}
+          # role-session-name: GitHubActionsOIDCSession
           aws-region: us-east-1
 
       # -----------------------------------------------------

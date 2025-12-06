@@ -348,7 +348,10 @@ resource "aws_iam_role" "github_actions_role" {
         }
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
-          StringEquals = {
+           StringEquals = {
+            "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
+          }
+            StringLike = {
             "token.actions.githubusercontent.com:sub" = "repo:nbethala/triton-mlops-gpu-platform:*"
           }
         }
@@ -365,4 +368,8 @@ resource "aws_iam_policy" "eks_ci_cd_policy" {
 resource "aws_iam_role_policy_attachment" "eks_ci_cd_attach" {
   role       = aws_iam_role.github_actions_role.name
   policy_arn = aws_iam_policy.eks_ci_cd_policy.arn
+}
+resource "aws_iam_role_policy_attachment" "github_actions_role_ecr" {
+  role       = aws_iam_role.github_actions_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser"
 }

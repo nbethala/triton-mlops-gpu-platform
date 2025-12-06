@@ -19,9 +19,17 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
+      # -----------------------------------------------------
+      # Get OIDC token (debug only)
+      # -----------------------------------------------------
       - name: Get OIDC token
         id: idtoken
-        run: echo "token=${{ steps.idtoken.outputs.token }}"
+        run: |
+          TOKEN=$(curl -sSL "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=sts.amazonaws.com" \
+            -H "Authorization: Bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" | jq -r .value)
+          echo "token=$TOKEN" >> $GITHUB_OUTPUT
+          echo "Decoded payload:"
+          echo $TOKEN | cut -d "." -f2 | base64 -d | jq .
 
       # -----------------------------------------------------
       # Configure AWS Credentials via OIDC

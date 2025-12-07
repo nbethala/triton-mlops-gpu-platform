@@ -35,7 +35,7 @@ model_bucket_name    = "triton-models"
 s3_model_bucket_arns = ["arn:aws:s3:::triton-models"]
 
 ecr_repo_arns    = ["arn:aws:ecr:us-east-1:478253497479:repository/triton-infer"]
-cluster_name     = "mlops-gpu-eks"
+cluster_name     = "triton-gpu-cluster"
 eks_cluster_arns = ["arn:aws:eks:us-east-1:478253497479:cluster/mlops-gpu-eks"]
 
 node_role_arns = []

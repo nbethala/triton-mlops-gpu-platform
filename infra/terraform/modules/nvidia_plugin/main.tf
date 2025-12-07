@@ -1,4 +1,3 @@
-# The Helm chart accepts clean values YAML block - modern way of doing things !
 resource "helm_release" "nvidia_device_plugin" {
   name       = "nvidia-device-plugin"
   namespace  = "kube-system"

@@ -124,12 +124,23 @@ module "ecr" {
   owner   = var.owner
 }
 
-#======================================================
-# Prometheus + Grafana provisioning
-#======================================================
-module "monitoring" {
-  source = "./modules/monitoring"
 
+# ======================================================
+# EKS cluster data sources
+# ======================================================
+data "aws_eks_cluster" "main" {
+  name = module.eks.cluster_name
+}
+
+data "aws_eks_cluster_auth" "main" {
+  name = module.eks.cluster_name
+}
+
+# ======================================================
+# Prometheus + Grafana provisioning
+# ======================================================
+module "monitoring" {
+  source       = "./modules/monitoring"
   cluster_name = module.eks.cluster_name
   namespace    = "monitoring"
 
@@ -137,11 +148,9 @@ module "monitoring" {
   prometheus_chart_version = "47.7.0"
   grafana_chart_version    = "9.5.1"
 
-  # 👇 Pass the Kubernetes provider from EKS down into monitoring
   providers = {
-    kubernetes = kubernetes
+    kubernetes = kubernetes.eks
     helm       = helm
   }
+  depends_on = [module.eks] # ensures cluster is ready first
 }
-
-

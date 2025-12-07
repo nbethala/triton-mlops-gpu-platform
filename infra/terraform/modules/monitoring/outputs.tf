@@ -8,7 +8,12 @@ output "prometheus_release" {
   value       = helm_release.prometheus.name
 }
 
+#output "monitoring_namespace" {
+#  description = "Namespace where monitoring is installed"
+#  value       = kubernetes_namespace.monitoring_ns.metadata[0].name
+#}
+
 output "monitoring_namespace" {
-  description = "Namespace where monitoring is installed"
-  value       = kubernetes_namespace.monitoring_ns.metadata[0].name
+  value = var.namespace
 }
+
